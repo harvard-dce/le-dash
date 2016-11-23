@@ -11,7 +11,9 @@ Django Project for DCE Learning Engineering Dashboard Apps
 1. `cp example.env .env` and update:
     1. set `SECRET_KEY` to anything
     1. set `DJANGO_SETTINGS_MODULE` to `le_dash.settings.dev`
+    1. set `ES_HOST` to the host:port combo of your elasticsearch instance
 1. run the tests: `./manage.py test` or `tox`
 1. create an empty local settings module: `touch le_dash/settings/local.py`
 1. setup the db: `./manage.py migrate`
 1. run the dev server: `./manage.py runserver` or `gunicorn le_dash.wsgi`
+1. run `./manage.py show_urls` to see a list of the available url patterns

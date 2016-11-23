@@ -1,5 +1,6 @@
-from django.http import HttpResponse
 from django.shortcuts import render
+from django.http import HttpResponse, JsonResponse
+from le_dash.es import LectureWatchQuery
 
 
 def index(request):
@@ -8,3 +9,9 @@ def index(request):
 
 def lecture(request, mpid):
     return HttpResponse("lecture: %s" % mpid)
+
+
+def data(request, mpid):
+    q = LectureWatchQuery(mpid)
+    resp = q.execute()
+    return JsonResponse(resp.to_dict())

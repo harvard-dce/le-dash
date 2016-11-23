@@ -139,3 +139,9 @@ LOGGING = {
         }
     }
 }
+
+ES_HOST = getenv('ES_HOST')
+ES_INDEX_PATTERNS = {
+    'useractions': 'useractions-*',
+    'episodes': 'episodes'
+}
