@@ -2,6 +2,7 @@
 Django Project for DCE Learning Engineering Dashboard Apps
 
 [![Build Status](https://travis-ci.org/harvard-dce/le-dash.svg?branch=project-setup)](https://travis-ci.org/harvard-dce/le-dash)
+[![Code Health](https://landscape.io/github/harvard-dce/le-dash/jluker-es-query/landscape.svg?style=flat)](https://landscape.io/github/harvard-dce/le-dash/jluker-es-query)
 
 ## Getting started
 
