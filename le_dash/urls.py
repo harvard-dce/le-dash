@@ -16,9 +16,13 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls import url, include
 
+from . import views
+
 urlpatterns = [
     url(r'^attendance/', include('attendance.urls')),
-    url(r'^lecture/', include('lecture.urls'))
+    url(r'^lecture/', include('lecture.urls')),
+    url(r'^$', views.home, name='home'),
+    url(r'^about/$', views.about, name='about'),
 ]
 
 # -----------------------------------------------------------------------------

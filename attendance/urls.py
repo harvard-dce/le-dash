@@ -3,6 +3,7 @@ from django.conf.urls import url
 from . import views
 
 urlpatterns = [
+    url(r'^$', views.index, name='attendance-index'),
     url(r'^series/(?P<series_id>\d{11})/$', views.series,
         name='attendance-series'),
     url(r'^lecture/(?P<mpid>[\w\-]{36})/$', views.lecture,
