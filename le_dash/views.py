@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from le_dash import __version__
 
 
 def home(request):
@@ -6,4 +7,4 @@ def home(request):
 
 
 def about(request):
-    return render(request, 'about.html')
+    return render(request, 'about.html', {'version': __version__})

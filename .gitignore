@@ -45,3 +45,6 @@ db.sqlite3
 
 # local django settings
 le_dash/settings/local.py
+
+# static root
+public/
