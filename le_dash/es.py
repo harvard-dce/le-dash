@@ -65,3 +65,37 @@ class LectureWatchQuery(UserActionQuery):
             format="yyyy-MM-dd HH:mm:ss",
             min_doc_count=1
         )
+
+
+class StudentWatchQuery(UserActionQuery):
+    """
+        All the distinct inpoints from each student for a mpid, each inpoint
+        means (30-60s) of video, this is used in conjunction with javascript
+        to calculate amount of footage watched
+    """
+
+    def __init__(self, mpid):
+        super(StudentWatchQuery, self).__init__()
+
+        self.search = self.search \
+            .query("match", mpid=mpid) \
+            .filter(
+                Q('term', is_live=0) &
+                Q('term', **{'action.is_playing': True}) &
+                Q('term', **{'action.type': 'HEARTBEAT'})
+            )
+
+        self.search = self.search.extra(size=0)
+
+        self.search.aggs.bucket(
+            name='by_huid',
+            agg_type='terms',
+            field='huid',
+            size=0
+        )
+        self.search.aggs['by_huid'].bucket(
+            name='by_inpoint',
+            agg_type='terms',
+            field='action.inpoint',
+            size=0
+        )
