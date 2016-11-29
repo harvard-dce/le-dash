@@ -1,4 +1,4 @@
-from le_dash import es
+from . import es
 
 
 def test_lecture_watch_query_const():

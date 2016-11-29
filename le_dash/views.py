@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from le_dash import __version__
+from . import __version__
 
 
 def home(request):
