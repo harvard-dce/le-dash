@@ -140,8 +140,10 @@ LOGGING = {
     }
 }
 
-ES_HOST = getenv('ES_HOST')
+ES_HOST = getenv('ES_HOST', 'localhost:9200')
 ES_INDEX_PATTERNS = {
     'useractions': 'useractions-*',
     'episodes': 'episodes'
 }
+
+BANNER_BASE_URL = getenv('BANNER_BASE_URL')

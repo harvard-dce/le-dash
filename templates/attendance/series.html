@@ -1,0 +1,22 @@
+{% extends 'attendance/base.html' %}
+
+{% block content %}
+    <h1>attendance report for series {{ series_id }}</h1>
+
+    <table id="report-table">
+        <thead>
+            <td>Name</td>
+            <td>HUID</td>
+            <td>% Lectures Viewed</td>
+        </thead>
+    {% for student in attendance %}
+        <tr>
+            <td>{{ student.name }}</td>
+            <td>{{ student.huid }}</td>
+            <td>{{ student.score }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+
+{% endblock %}
+

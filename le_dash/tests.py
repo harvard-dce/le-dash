@@ -1,4 +1,12 @@
 from . import es
+from .rollcall import SeriesAttendance
+
+
+def test_series_attendance(student_maker):
+    student = student_maker('12345', 'Franklin', 'D', 'Roosevelt')
+    att = SeriesAttendance('20160145678', student)
+    assert att.huid == '12345'
+    assert att.name == 'Franklin D Roosevelt'
 
 
 def test_lecture_watch_query_const():

@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" type="text/css"
+          href="{% static 'libs/datatables/jquery.dataTables.min.css' %}">
+{% endblock %}
+
+{% block js %}
+    <script type="text/javascript" src="{% static 'libs/datatables/jquery.dataTables.min.js' %}"></script>
+    <script type="text/javascript">
+    $(document).ready(function(){
+        $('#report-table').DataTable({
+            "ordering": false,
+            "iDisplayLength": 25
+        });
+    });
+    </script>
+{% endblock %}

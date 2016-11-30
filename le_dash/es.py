@@ -12,8 +12,16 @@ class ESResponse(object):
     def to_dict(self):
         return self.response.to_dict()
 
+    @property
+    def hits(self):
+        return self.response.hits
+
 
 class ESQuery(object):
+
+    def __init__(self):
+        self.es = Elasticsearch(settings.ES_HOST)
+        self.search = Search(using=self.es, index=self.index)
 
     def to_dict(self):
         return self.search.to_dict()
@@ -23,12 +31,21 @@ class ESQuery(object):
         return ESResponse(resp)
 
 
+class EpisodeQuery(ESQuery):
+
+    def __init__(self, **kwargs):
+        self.index = settings.ES_INDEX_PATTERNS['episodes']
+        super(EpisodeQuery, self).__init__()
+
+        for field, value in kwargs.items():
+            self.search = self.search.query("match", **{field: value})
+
+
 class UserActionQuery(ESQuery):
 
     def __init__(self):
-        self.es = Elasticsearch(settings.ES_HOST)
         self.index = settings.ES_INDEX_PATTERNS['useractions']
-        self.search = Search(using=self.es, index=self.index)
+        super(UserActionQuery, self).__init__()
 
 
 class LectureWatchQuery(UserActionQuery):
@@ -99,3 +116,22 @@ class StudentWatchQuery(UserActionQuery):
             field='action.inpoint',
             size=0
         )
+
+
+class Episode(object):
+
+    def __init__(self, doc):
+        self.doc = doc
+
+    def __getattr__(self, item):
+        if item in self.doc:
+            return self.doc[item]
+        raise AttributeError()
+
+
+def episode_lookup(**kwargs):
+    q = EpisodeQuery(**kwargs)
+    resp = q.execute()
+    if resp.hits.total == 1:
+        return Episode(resp.hits[0])
+    return
