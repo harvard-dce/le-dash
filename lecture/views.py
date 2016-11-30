@@ -1,10 +1,23 @@
 from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
+from django.http import HttpResponse
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 from le_dash.es import LectureWatchQuery
+
+from .forms import MpidForm
 
 
 def index(request):
-    return render(request, 'lecture/index.html')
+    if request.method == 'POST':
+        form = MpidForm(request.POST)
+        if form.is_valid():
+            mpid = form.cleaned_data['mpid'].strip()
+            return HttpResponseRedirect(reverse('lecture', args=(mpid, )))
+    else:
+        form = MpidForm()
+
+    return render(request, 'lecture/index.html', {'form': form})
 
 
 def lecture(request, mpid):
