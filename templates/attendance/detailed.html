@@ -1,0 +1,215 @@
+{% extends 'd3_base.html' %}
+
+{% block content %}
+<h1>
+{{ Course_name }}
+{{ Lecture_number }}
+</h1>
+<div id="duration"></div>
+
+Minutes of the video viewed at least once. (Resolution is 1 minute )
+<br>
+<UL>
+<LI><a href="{% url 'attendance-summary' mpid %}">Student viewing summary</a>
+<LI><a href="{% url 'attendance-summarytable' mpid %}">Student viewing Table</a>
+</ul>
+<div id="chart"></div>
+
+    {% endblock %}
+
+{% block js %}
+{{ block.super }}
+
+<script type="text/javascript">
+
+$(document).ready(function() {
+
+d3.json("{% url 'attendance-data' mpid %}", function(error, data) {
+  if (error) throw error;
+   var duration = getStudentViewDuration(data);
+   var nested= d3.nest()
+        .key(function(d) { return d.key; })
+        .rollup(function(g) { 
+           return g.map(function(d) { return CollectStudentView(d.by_inpoint.buckets); });
+         })
+        .entries(data.aggregations.by_huid.buckets);
+
+   var total_time= d3.nest()
+        .key(function(d) { return d.key; })
+        .rollup(function(g) { 
+           return d3.sum(g, function(d) {return tallyStudentView(d.by_inpoint.buckets); });
+         })
+        .entries(data.aggregations.by_huid.buckets);
+
+    // combine the two dataset
+    nested.map( function(d,i) { if (d.key==total_time[i].key) return d.total= total_time[i].values; });
+
+    /* doesn't sort
+    mydata = nested.map(function(d,i) {
+    return {
+        key: d.key,
+        total: total_time[i].values,
+        points: d.values[0].map(function (v) {
+            return {
+                x: v,
+                y: d.key
+            };
+        })
+    };
+    });
+    */
+
+    // in descending order
+    nested.sort(function (a, b) {
+      if (a.total > b.total) {
+        return -1;
+      }
+      if (a.total < b.total) {
+        return 1;
+      }
+      return 0;
+    });
+
+    var width = 1060, bar_height=30;
+        max_height = 1080;
+
+    // height is based on number of entries
+    height = nested.length * bar_height;
+    //if (height > max_height) height = max_height;
+
+    // margins
+    var margin = {top: 30, right: 60, bottom: 30, left: 100},
+        w = width - margin.left - margin.right,
+        h = height - margin.top - margin.bottom;
+
+    var formatCount = d3.format(",.0f"),
+        formatTime = d3.time.format("%H:%M"), //:%S"),
+        formatPercent = d3.format(".0%"),
+        formatSeconds = function(d) { return formatTime(new Date(2016, 0, 1, 0, 0, d)); };
+
+    var x = d3.scale.linear().range([0, w]),
+        y = d3.scale.ordinal().rangeRoundBands([0, h], .1);
+
+    var xAxis = d3.svg.axis().scale(x).orient("top").tickSize(4)
+        .tickFormat(formatSeconds);
+        yAxis = d3.svg.axis().scale(y).orient("left").tickSize(0);
+
+    var svg = d3.select("#chart").append("svg")
+        .attr("width", w + margin.left + margin.right)
+        .attr("height", h + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    // Set the scale domain.
+    y.domain( nested.map(function(d) { return d.key; }));
+    var max=duration;
+    if (max==0) {
+        max = d3.max( nested, function(g) {
+                    return d3.max( g.values, function(d) {
+                    return d3.max(d); });
+        });
+    }
+    max *= 1.1;               // extra space for text 
+    x.domain([0, max ]);
+    var box_width = max/w * (7200/duration) ;  // each box is 60 seconds
+    console.log(box_width);
+
+    var scatterChartContainer = svg.append("g")
+    .attr('class', 'scatterCharts')
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    scatterChartContainer.append("g")
+    .attr("class", "scatterPlot y axis")
+    .attr("transform", "translate(" + -margin.left + ",0)")
+    .call(yAxis);
+
+    // create the points
+    mydata = nested.map(function(d) {
+    return {
+        key: d.key,
+        points: d.values[0].map(function (v) {
+            return {
+                x: v,
+                y: d.key
+            };
+        })
+    };
+    });
+
+    var gridlines = d3.svg.axis().scale(x).orient("top").tickSize(-h)
+        .tickFormat("");
+
+    scatterChartContainer.append("g")
+    .attr("class", "scatterPlot x axis")
+    .attr("transform", "translate(" + -margin.left+ ",0)")
+    .call(xAxis)
+    .append("g")
+    //.attr("transform", "translate( 10 ,-10)")
+    .text("Timestamps in video");
+
+    scatterChartContainer.append("g")
+    .attr("class", "scatterPlot gridlines")
+    .attr("transform", "translate(" + -margin.left + ",0)")
+    .attr("opacity",0.5)
+    .style({
+        'stroke': 'gray',
+        'fill': 'none',
+        'stroke-width': '1px',
+        'opacity': 0.5
+    })
+    .call(gridlines);
+
+    var color = d3.scale.category10();
+    var scatterPlotGroups = scatterChartContainer.selectAll(".scatterPlotGroup")
+        .data(mydata)
+        .enter().append("g")
+        .attr("class", "scatterPlotGroup");
+
+    var scatterPlotBoxes = scatterPlotGroups.selectAll("rect")
+        .data(function(d) { return d.points; })
+        .enter().append("rect")
+        .attr("x", function(d) { 
+                return x(d.x); })
+        .attr("y", function(d) {
+                 return y(d.y); })
+        .attr("width", box_width)
+        .attr("height", 5)
+        .attr("transform", "translate(" + -margin.left + "," + 10  + ")")
+        .attr("fill", function() { return color(d3.select(this.parentNode).datum().key); });
+
+    var scatterPlotTotal = scatterPlotGroups.selectAll("text")
+        .data(nested)
+        .enter().append("text")
+        .attr("text-anchor", "start")
+        .attr("x", function(d) { return x(duration); })
+        .attr("y", function(d) { return y(d.key); })
+        .attr("dx", "2em")
+        .attr("dy", ".5em")
+        .attr("transform", "translate(" + -margin.left + "," + 10  + ")")
+        .attr("font-family", "sans-serif")
+        //.style({ 'stroke-width': 0, 'fill': 'grey', 'opacity': 0.8 })
+        .text(function(d) { return formatPercent(d.total/duration); });
+
+    scatterChartContainer.append("text")
+          .attr("class", "scatterPlot x axis")
+          .attr("transform", "rotate(-90)")
+          .attr("x",-h/2)
+          .attr("y",-margin.left *2 )
+          .attr("dy", ".71em")
+          .text("HUID");
+
+    scatterChartContainer.append("g")
+          .attr("class", "scatterPlot y axis")
+          .style("text-anchor", "end")
+          .append("text")
+          .attr("x", w/2 - margin.left)
+          .attr("y", -margin.top )
+          .attr("dy", "-.71em")
+          .text("Time points in video ("+ formatSeconds(duration)+ ")" );
+
+});
+});
+</script>
+
+
+{% endblock %}

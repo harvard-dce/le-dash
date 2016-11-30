@@ -1,8 +1,8 @@
-
 import six
 import requests
 from django.conf import settings
 from collections import namedtuple
+
 
 if six.PY3:
     from xml.etree import ElementTree as etree
@@ -10,6 +10,7 @@ if six.PY3:
 else:
     import lxml.etree as etree
     from urlparse import urljoin
+
 
 StudentInfo = namedtuple(
     'StudentInfo',

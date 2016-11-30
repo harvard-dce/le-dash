@@ -1,7 +1,7 @@
 import random
 from operator import attrgetter
 from le_dash.banner import get_student_list
-from le_dash.es import episode_lookup
+from le_dash.es import episode_lookup, StudentWatchQuery
 
 
 def series(series_id, sort_key='student.last_name'):
@@ -58,3 +58,43 @@ class LectureAttendance(Attendance):
 
     def generate_score(self):
         return random.randint(0, 100)
+
+
+class LectureAttendanceByAllStudents(Attendance):
+
+    def __init__(self, mpid):
+        self.mpid = mpid
+        self.results = dict()
+        self._generate_score()
+
+    def _generate_score(self):
+        """ returns an associate array of student and % watched """
+        result = StudentWatchQuery(self.mpid).execute().to_dict()
+        duration = result['hits']['hits'][0]['_source']['episode']['duration']
+        duration /= 1000
+        viewings = result['aggregations']['by_huid']['buckets']
+        for viewing in viewings:
+            student = viewing["key"]
+            views = viewing["by_inpoint"]["buckets"]
+            sorted_inpoints = sorted(views, key=lambda x: int(x["key"]))
+            lastv = 0
+            viewed = 0
+            for inpoint in sorted_inpoints:
+                inpt = int(inpoint["key"])
+                # is gap between inpoints, more than 2x 30 seconds
+                if (inpt - lastv) > 60:
+                    # Assume student watched 60 seconds
+                    viewed = viewed + 60
+                else:
+                    viewed = viewed + (inpt - lastv)    # Close the gap
+                lastv = inpt
+            self.results[str(student)] = 100.0 * viewed/duration
+
+    def all_scores(self):
+        return self.results
+
+    def student_scores(self, student):
+        try:
+            return self.results[student]
+        except:
+            return None

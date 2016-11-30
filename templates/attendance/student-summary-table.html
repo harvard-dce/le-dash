@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>
+{{ course_name }} {{ lecture_number }}
+</h1>
+Portion of the video viewed at least once. (Resolution is 1 minute)
+<UL>
+<LI><a href="{% url 'attendance-detailed' mpid %}">Detailed student viewing</a>
+<LI><a href="{% url 'attendance-summary' mpid %}">Student viewing graph</a>
+</UL>
+
+<table border="1">
+<TH>
+Student
+</TH>
+<TH>
+% Viewed
+</TH>
+{% for k,v in students.items %}
+   <TR>
+   <td>
+   {{ k }}
+   </td>
+   <td>
+   {{ v | floatformat:2 }} %
+   </td>
+   </TR>
+{% endfor %}
+</table>
+
+
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends 'd3_base.html' %}
+{% load static %}
+
+{% block content %}
+
+<h1>
+{{course_name}} - {{ lecture_number }} ({{duration}})
+</h1>
+Number of times a section of the video has been watched (resolution is 5 minutes)
+
+<graph/>
+
+{% endblock %}
+
+{% block js %}
+{{ block.super }}
+<script type="text/javascript">
+
+    $(document).ready(function(){
+        // Should change to viewports
+        var width = 1060,
+                height = 500;
+
+        var margin = {top: 40, right: 10, bottom: 50, left: 40},
+                w = width - margin.left - margin.right,
+                h = height - margin.top - margin.bottom;
+
+        var formatCount = d3.format(",.0f"),
+                formatTime = d3.time.format("%H:%M"),
+                formatSeconds = function(d) { return formatTime(new Date(2016, 0, 1, 0, 0, d)); };
+
+        var y = d3.scale.linear().range([h, 0]),
+                x = d3.scale.ordinal().rangeRoundBands([0, w], .1);
+
+        var xAxis = d3.svg.axis().scale(x)
+                        .orient("bottom")
+                        .tickFormat(formatSeconds),
+                yAxis = d3.svg.axis().scale(y).orient("left")
+                        .tickFormat(d3.format("d"));
+
+        var svg = d3.select("graph").append("svg")
+                .attr("width", width )
+                .attr("height", height )
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," +  margin.top + ")");
+
+        d3.json("{% url 'lecture-data' mpid %}", function(error, data) {
+            if (error) throw error;
+            data = tallyViewCount(data)
+
+            // Set the scale domain.
+            x.domain(data.map(function(d) { return d.key; }));
+            y.domain([0, d3.max(data, function(d) { return d.values  })]);
+
+            var bar = svg.selectAll("g.bar")
+                    .data(data)
+                    .enter().append("g")
+                    .attr("class", "bar")
+                    .attr("transform", function(d) { return "translate(" + x(d.key) + ",0)"; });
+
+            bar.append("rect")
+                    .attr("y", function(d){ return y( d.values) })
+                    .attr("height", function(d) { return h - y(d.values); })
+                    .attr("width", x.rangeBand());
+
+            bar.append("text")
+                    .attr("class", "value")
+                    .attr("y", function(d) { return y(d.values); })
+                    .attr("x", x.rangeBand() / 2)
+                    .attr("dy", "1.5em")
+                    .attr("dx", ".35em")
+                    .attr("text-anchor", "end")
+                    .text(function(d) { if (d.values > 0) return formatCount( d.values); });
+
+            // Override default because the bottom gets too crowd
+            svg.append("g")
+                    .attr("class", "x axis")
+                    .style({
+                        'font-size': '12px',
+                        'stroke': 'black',
+                        'stroke-width': '1px',
+                        'opacity': 1.0
+                    })
+                    .attr("transform", "translate(0,"+ h +")")
+                    .call(xAxis);
+
+            svg.append("text")
+                    .style("text-anchor", "middle")
+                    .attr("transform", "translate("+ (width/2) +","+ (h+ margin.bottom) +")")  // centre below axis
+                    .text("Timepoint in the Video");
+
+            svg.append("g")
+                    .attr("class", "y axis")
+                    .call(yAxis)
+                    .append("text")
+                    .attr("x",-h)
+                    .attr("y",-margin.left )
+                    .attr("dy", ".71em")
+                    .attr("transform", "rotate(-90)")
+                    .style("text-anchor", "left")
+                    .text("Number of times watched by student");
+
+        });
+    });
+</script>
+{% endblock %}

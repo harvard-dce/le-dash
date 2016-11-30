@@ -1,0 +1,156 @@
+{% extends 'd3_base.html' %}
+
+{% block content %}
+
+<h1>
+{{ course_name }}  {{ lecture_number }}
+</h1>
+Portion of the video viewed at least once. (Resolution is 1 minute)
+<br>
+<div id="summary"></div>
+<div id="table"></div>
+<br>
+<UL>
+<LI><a href="{% url 'attendance-detailed' mpid %}">Detailed student viewing</a>
+<LI><a href="{% url 'attendance-summarytable' mpid %}">Student viewing Table</a>
+</UL>
+
+<div id="summary"></div>
+<div id="chart"></div>
+
+{% endblock %}
+
+{% block js %}
+{{ block.super }}
+<script type="text/javascript">
+
+$(document).ready(function() {
+
+var div = d3.select("body").append("div")
+    .attr("class", "tooltip")               
+    .style("opacity", 0);
+
+d3.json("{% url 'attendance-data' mpid %}", function(error, data) {
+    if (error) throw error;
+
+    var duration = getStudentViewDuration(data);
+
+    var nested= d3.nest()
+    .key(function(d) { return d.key; })
+    .rollup(function(g) { 
+       return d3.sum(g, function(d) {return tallyStudentView(d.by_inpoint.buckets); });
+     })
+    .entries(data.aggregations.by_huid.buckets);
+
+    // in descending order
+    nested.sort(function (a, b) {
+      if (a.values > b.values) {
+        return -1;
+      }
+      if (a.values < b.values) {
+        return 1;
+      }
+      return 0;
+    });
+
+    var width = 800, bar_height=30, max_height = 1080;
+    var margin = {top: 30, right: 60, bottom: 30, left: 100};
+
+    // height is based on number of entries 
+    var height = nested.length * bar_height +  margin.top + margin.bottom;
+
+    var w = width - margin.left - margin.right,
+        h = height - margin.top - margin.bottom;
+
+    var formatCount = d3.format(",.0f"),
+        formatPercent = d3.format(".0%"), 
+        formatTime = d3.time.format("%H:%M"), 
+        formatSeconds = function(d) { return formatTime(new Date(2016, 0, 1, 0, 0, d)); };
+
+    var mean = d3.mean( nested, function(d) { return d.values; });
+    var median = d3.median( nested, function(d) { return d.values; });
+    var sd = d3.deviation( nested, function(d) { return d.values; });
+
+    $('#summary').html("Number of viewing students: " + nested.length + ", Mean: "+ formatSeconds(mean) +", Median: "+ formatSeconds(median)+ ", Standard Deviation:"+ formatSeconds(sd) );
+    var x = d3.scale.linear().range([0, w]),
+        y = d3.scale.ordinal().rangeRoundBands([0, h], .1);
+
+//lookUpStudent("10930154", "201701");
+    var xAxis = d3.svg.axis().scale(x).orient("top").tickSize(10)
+        .tickFormat(formatSeconds);
+        yAxis = d3.svg.axis().scale(y).orient("left").tickSize(0);
+
+    var svg = d3.select("#chart").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    // Set the scale domain.
+    if (duration == 0)
+        duration = d3.max(nested, function(d) { return d.values  });
+
+    var max = duration * 1.1;  // Add buffer
+    x.domain([0, max]);
+    y.domain( nested.map(function(d) { return d.key; }));
+
+    var bar = svg.selectAll("g.bar")
+          .data(nested)
+          .enter()
+          .append("g")
+          .attr("class", "bar")
+          .attr("transform", function(d,i) { return "translate(0," + y(d.key)+")"; });
+
+    bar.append("rect")
+          .attr("width", function(d) { return x(d.values); })
+          .attr("height", y.rangeBand());
+
+    bar.append("text")
+          .attr("class", "value")
+          .attr("x", function(d) { return x(d.values); })
+          .attr("y", function(d,i) { return y.rangeBand() / 2; } )
+          .attr("dy", ".2em")
+          .attr("dx", ".5em")
+          .attr("text-anchor", "start")
+          .text(function(d) { return formatSeconds( d.values)+" ("+formatPercent(d.values/duration)+")"; });
+
+    bar.on("mouseover", function(d) {      
+            div.transition()        
+                .duration(200)      
+                .style("opacity", .9);      
+            div .html("banner lookup student info for id=" + d.key + "<br/>")  
+                .style("left", (d3.event.pageX) + "px")     
+                .style("top", (d3.event.pageY - 28) + "px");    
+            })                  
+        .on("mouseout", function(d) {       
+            div.transition()        
+                .duration(500)      
+                .style("opacity", 0);   
+        });
+
+    svg.append("g")
+          .attr("class", "x axis")
+          .attr("transform", "translate(0," + margin.top +")")
+          .call(xAxis)
+          .append("text")
+          .style("text-anchor", "end")
+          .attr("y", "-3.5em")
+          .attr("x", width/2)
+          .text("Number of minutes watched (Duration:" + formatSeconds(duration) + ")" );
+
+    svg.append("g")
+          .attr("class", "y axis")
+          .call(yAxis)
+          .append("text")
+          .attr("y", -margin.left + 10)
+          .attr("x", -h/2)
+          .attr("dy", ".71em")
+          .style("text-anchor", "left")
+          .attr("transform", "rotate(-90)")
+          .text("HUID");
+
+});
+});
+</script>
+
+{% endblock %}

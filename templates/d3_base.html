@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" type="text/css"
+          href="{% static 'css/graph.css' %}">
+{% endblock %}
+
+{% block js %}
+    <script type="text/javascript" src="{% static 'libs/d3/d3.v3.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/dce_graph.js' %}"></script>
+{% endblock %}

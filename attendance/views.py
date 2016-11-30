@@ -1,6 +1,7 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from le_dash import rollcall
+from le_dash.es import StudentWatchQuery
 
 
 def index(request):
@@ -27,3 +28,25 @@ def lecture(request, mpid):
 
 def student(request, huid):
     return HttpResponse("student: %s" % huid)
+
+
+def data(request, mpid):
+    q = StudentWatchQuery(mpid)
+    resp = q.execute()
+    return JsonResponse(resp.to_dict())
+
+
+def summary(request, mpid):
+    context = {'mpid': mpid}
+    return render(request, 'attendance/summary.html', context)
+
+
+def detailed(request, mpid):
+    context = {'mpid': mpid}
+    return render(request, 'attendance/detailed.html', context)
+
+
+def summarytable(request, mpid):
+    students = rollcall.LectureAttendanceByAllStudents(mpid).all_scores()
+    context = {'students': students, 'mpid': mpid}
+    return render(request, 'attendance/student-summary-table.html', context)

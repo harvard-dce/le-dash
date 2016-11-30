@@ -15,3 +15,9 @@ def data(request, mpid):
     q = LectureWatchQuery(mpid)
     resp = q.execute()
     return JsonResponse(resp.to_dict())
+
+
+def histogram(request, mpid):
+    # Need to fill in course_name, lecture number, etc
+    context = {'mpid': mpid}
+    return render(request, 'lecture/histogram.html', context)

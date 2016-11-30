@@ -102,7 +102,7 @@ class StudentWatchQuery(UserActionQuery):
                 Q('term', **{'action.type': 'HEARTBEAT'})
             )
 
-        self.search = self.search.extra(size=0)
+        self.search = self.search.extra(size=1)
 
         self.search.aggs.bucket(
             name='by_huid',
