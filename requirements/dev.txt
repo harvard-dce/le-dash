@@ -4,4 +4,6 @@ tox
 flake8
 django-extensions
 django-debug-toolbar
+invoke
+boto3
 
