@@ -12,3 +12,8 @@ script: tox -e $TOX_ENV
 
 install:
     - pip install tox
+
+notifications:
+  hipchat:
+    rooms:
+      secure: "YlA7w8ppMJ2jpZthy4uUz8480YSfmJG+NlSfPoUPAs8Q74bHlTIqiVUQxc1Gg+onXsCmjKHpAS6bICUdeYD7Cv4oS/YKeOvcTDQSOopcMTL3zD4DAASmg8y3UvZJ1kcUes/inh4dI31ZY+dHl9PMG1MhTsKBOq1NG98GJA1JS7/j3sEXeHQ+8ejbFGoy0SGaqr7FnaO3lNbwqVj3kqJ4to2bedGjzNL8EQKoUAEZhwBPA1LW6X8TlGp+OenAw6f4O9zAw1U1FUAR8Ouhc83OdO8P8Xq+eylMp4j28xd1xdlPZdWOAbOvR3X5KxBqhp0Yn4Vv0P+KyxtM7z32STentI2Lx6Ea0vywKOZZFlgNFo5qFP1DWxxZjkH7uk+0HOF9wI3Nvg/IFJetRxjqVVXvVK7Ft+i5P5BO1WUbdFbhG8c/IYejylhEqHuHwiZP5f34qf0NrAZMNprc46ps+jtGmG7ya5zAqFMzWKqcR/4mmf07S9WVWvHCY6cthRfluafxdqM7e8UNBbxsf66aZBtxQI934Yq7i/RYxEcWelErCUoKfJJlWlHgw6TvsTeAoQbjElQbMlN7a0FYC0FDnSVZLvVkRC/sIPYVh5I8QNzsUYaBprPJwl3zivZyQw9cSIDEhI5/sGDxc/kHg6Yh/b5x94NSx9ZhdDh8+imgnXm6Iqo="
