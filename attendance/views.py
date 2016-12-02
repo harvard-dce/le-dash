@@ -1,11 +1,26 @@
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
+from django.http import JsonResponse
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.urls import reverse
+
 from le_dash import rollcall
 from le_dash.es import StudentWatchQuery
 
+from .forms import SeriesForm
+
 
 def index(request):
-    return render(request, 'attendance/index.html')
+    if request.method == 'POST':
+        form = SeriesForm(request.POST)
+        if form.is_valid():
+            series_id = form.cleaned_data['series_id'].strip()
+            return HttpResponseRedirect(reverse(
+                'attendance-series', args=(series_id, )))
+    else:
+        form = SeriesForm()
+
+    return render(request, 'attendance/index.html', {'form': form})
 
 
 def series(request, series_id):

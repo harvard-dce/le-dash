@@ -1,7 +1,7 @@
-from django.shortcuts import render
 from django.http import JsonResponse
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
+from django.shortcuts import render
 from django.urls import reverse
 from le_dash.es import LectureWatchQuery
 

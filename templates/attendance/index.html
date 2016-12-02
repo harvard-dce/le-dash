@@ -2,4 +2,10 @@
 
 {% block content %}
 <h1>this is the attendance page</h1>
+
+<form action="{% url 'attendance-index' %}" method="post">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="submit" />
+</form>
 {% endblock %}
