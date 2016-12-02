@@ -5,3 +5,4 @@ elasticsearch-dsl>=2.0.0,<3.0.0
 lxml==3.6.4
 requests==2.12.1
 six==1.10.0
+whitenoise==3.2.2
