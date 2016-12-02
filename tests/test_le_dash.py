@@ -1,5 +1,5 @@
-from . import es
-from .rollcall import SeriesAttendance
+from le_dash import es
+from le_dash.rollcall import SeriesAttendance
 
 
 def test_series_attendance(student_maker):
