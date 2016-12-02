@@ -2,9 +2,8 @@
 
 {% block content %}
 
-<h1>
-{{ course_name }}  {{ lecture_number }}
-</h1>
+<h1> {{ title }} </h1>
+<h3> {{ course_name }} {{ series }} </h3>
 Portion of the video viewed at least once. (Resolution is 1 minute)
 <br>
 <div id="summary"></div>
@@ -24,7 +23,27 @@ Portion of the video viewed at least once. (Resolution is 1 minute)
 {{ block.super }}
 <script type="text/javascript">
 
+
 $(document).ready(function() {
+
+function format_student_name(student){
+    return (
+        student.first_name+" "+student.last_name
+    );
+}
+
+function format_student_data(student){
+    return(
+        student.first_name+" "+
+            (typeof(student.mi)=="string"?(student.mi+" "):"")+
+            student.last_name+"("+
+            student.reg_level+")"+
+            "<br>"+
+            student.huid+
+            "<br>"+
+            student.email
+       );
+}
 
 var div = d3.select("body").append("div")
     .attr("class", "tooltip")               
@@ -35,12 +54,24 @@ d3.json("{% url 'attendance-data' mpid %}", function(error, data) {
 
     var duration = getStudentViewDuration(data);
 
-    var nested= d3.nest()
+    var nested = d3.nest()
     .key(function(d) { return d.key; })
     .rollup(function(g) { 
        return d3.sum(g, function(d) {return tallyStudentView(d.by_inpoint.buckets); });
      })
     .entries(data.aggregations.by_huid.buckets);
+
+    var students = {};
+    if (data.students) {
+        // console.log(data.students);
+        for (index in data.students) {
+            //console.log(data.students[index]);
+            students[ data.students[index].huid ] = {
+               "tooltip": format_student_data(data.students[index]),
+               "name": format_student_name( data.students[index])
+            }
+        }
+    }
 
     // in descending order
     nested.sort(function (a, b) {
@@ -53,9 +84,8 @@ d3.json("{% url 'attendance-data' mpid %}", function(error, data) {
       return 0;
     });
 
-    var width = 800, bar_height=30, max_height = 1080;
-    var margin = {top: 30, right: 60, bottom: 30, left: 100};
-
+    var width = 800, bar_height=30;
+    var margin = {top: 50, right: 60, bottom: 30, left: 100};
     // height is based on number of entries 
     var height = nested.length * bar_height +  margin.top + margin.bottom;
 
@@ -72,11 +102,11 @@ d3.json("{% url 'attendance-data' mpid %}", function(error, data) {
     var sd = d3.deviation( nested, function(d) { return d.values; });
 
     $('#summary').html("Number of viewing students: " + nested.length + ", Mean: "+ formatSeconds(mean) +", Median: "+ formatSeconds(median)+ ", Standard Deviation:"+ formatSeconds(sd) );
+
     var x = d3.scale.linear().range([0, w]),
         y = d3.scale.ordinal().rangeRoundBands([0, h], .1);
 
-//lookUpStudent("10930154", "201701");
-    var xAxis = d3.svg.axis().scale(x).orient("top").tickSize(10)
+    var xAxis = d3.svg.axis().scale(x).orient("top").tickSize(0)
         .tickFormat(formatSeconds);
         yAxis = d3.svg.axis().scale(y).orient("left").tickSize(0);
 
@@ -118,7 +148,7 @@ d3.json("{% url 'attendance-data' mpid %}", function(error, data) {
             div.transition()        
                 .duration(200)      
                 .style("opacity", .9);      
-            div .html("banner lookup student info for id=" + d.key + "<br/>")  
+            div.html(students[d.key].tooltip)  
                 .style("left", (d3.event.pageX) + "px")     
                 .style("top", (d3.event.pageY - 28) + "px");    
             })                  
@@ -130,11 +160,10 @@ d3.json("{% url 'attendance-data' mpid %}", function(error, data) {
 
     svg.append("g")
           .attr("class", "x axis")
-          .attr("transform", "translate(0," + margin.top +")")
           .call(xAxis)
           .append("text")
           .style("text-anchor", "end")
-          .attr("y", "-3.5em")
+          .attr("y", "-2em")
           .attr("x", width/2)
           .text("Number of minutes watched (Duration:" + formatSeconds(duration) + ")" );
 

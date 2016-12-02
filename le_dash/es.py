@@ -5,7 +5,6 @@ from elasticsearch_dsl import Search, Q
 
 
 class ESResponse(object):
-
     def __init__(self, response):
         self.response = response
 
@@ -18,7 +17,6 @@ class ESResponse(object):
 
 
 class ESQuery(object):
-
     def __init__(self):
         self.es = Elasticsearch(settings.ES_HOST)
         self.search = Search(using=self.es, index=self.index)
@@ -32,7 +30,6 @@ class ESQuery(object):
 
 
 class EpisodeQuery(ESQuery):
-
     def __init__(self, **kwargs):
         self.index = settings.ES_INDEX_PATTERNS['episodes']
         super(EpisodeQuery, self).__init__()
@@ -42,14 +39,12 @@ class EpisodeQuery(ESQuery):
 
 
 class UserActionQuery(ESQuery):
-
     def __init__(self):
         self.index = settings.ES_INDEX_PATTERNS['useractions']
         super(UserActionQuery, self).__init__()
 
 
 class LectureWatchQuery(UserActionQuery):
-
     def __init__(self, mpid, interval_inpoint='300', interval_timestamp='5m'):
         super(LectureWatchQuery, self).__init__()
 
@@ -58,8 +53,7 @@ class LectureWatchQuery(UserActionQuery):
             .filter(
                 Q('term', is_live=0) &
                 Q('term', **{'action.is_playing': True}) &
-                Q('term', **{'action.type': 'HEARTBEAT'})
-            )
+                Q('term', **{'action.type': 'HEARTBEAT'}))
 
         self.search = self.search.extra(size=0)
 
@@ -99,8 +93,7 @@ class StudentWatchQuery(UserActionQuery):
             .filter(
                 Q('term', is_live=0) &
                 Q('term', **{'action.is_playing': True}) &
-                Q('term', **{'action.type': 'HEARTBEAT'})
-            )
+                Q('term', **{'action.type': 'HEARTBEAT'}))
 
         self.search = self.search.extra(size=1)
 
@@ -118,8 +111,39 @@ class StudentWatchQuery(UserActionQuery):
         )
 
 
-class Episode(object):
+class SeriesWatchQuery(UserActionQuery):
+    """
+        Listing all the episodes in the series and the number of students
+        who watched them
+    """
 
+    def __init__(self, seriesid):
+        super(SeriesWatchQuery, self).__init__()
+
+        self.search = self.search \
+            .query("match", **{'episode.series': seriesid}) \
+            .filter(
+                Q('term', is_live=0) &
+                Q('term', **{'action.is_playing': True}) &
+                Q('term', **{'action.type': 'HEARTBEAT'}))
+
+        self.search = self.search.extra(size=0)
+
+        self.search.aggs.bucket(
+            name='by_mpid',
+            agg_type='terms',
+            field='mpid',
+            size=0
+        )
+        self.search.aggs['by_mpid'].bucket(
+            name='by_huid',
+            agg_type='terms',
+            field='huid',
+            size=0
+        )
+
+
+class Episode(object):
     def __init__(self, doc):
         self.doc = doc
 
