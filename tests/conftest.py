@@ -3,8 +3,8 @@ from le_dash.banner import StudentInfo
 
 
 @pytest.fixture(autouse=True)
-def disable_requests(mocker):
-    mocker.patch('requests.get')
+def no_requests(monkeypatch):
+    monkeypatch.delattr("requests.sessions.Session.request")
 
 
 @pytest.fixture()
