@@ -42,7 +42,7 @@ except ImportError:
 # -----------------------------------------------------------------------------
 
 try:
-    from local import * # noqa
+    from .local import * # noqa
 except ImportError:
     print('failed to import local settings')
 

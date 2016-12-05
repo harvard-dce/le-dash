@@ -1,14 +1,39 @@
 {% extends 'd3_base.html' %}
 {% load static %}
+{% load common_tags %}
 
 {% block content %}
 
-<h1>
-{{course_name}} - {{ lecture_number }} ({{duration}})
-</h1>
-Number of times a section of the video has been watched (resolution is 5 minutes)
-
-<graph/>
+    <div class="row">
+        <div class="col-md-12">
+            <h1>{{ episode.course }}</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <h3>{{ episode.title }}</h3>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 text-center">
+            Number of times a section of the video has been watched (resolution is 5 minutes)
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <graph/>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <strong>Series</strong>:
+            {{ episode.series }}<br/>
+            <strong>Date</strong>:
+            {{ episode.start }}<br/>
+            <strong>Duration</strong>:
+            {{ episode.duration | video_length }}<br/>
+        </div>
+    </div>
 
 {% endblock %}
 

@@ -1,9 +1,8 @@
 from django.http import JsonResponse
-from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
-from le_dash.es import LectureWatchQuery
+from le_dash.es import LectureWatchQuery, episode_lookup
 
 from .forms import MpidForm
 
@@ -21,16 +20,12 @@ def index(request):
 
 
 def lecture(request, mpid):
-    return HttpResponse("lecture: %s" % mpid)
+    episode = episode_lookup(mpid=mpid)
+    context = {'mpid': mpid, 'episode': episode}
+    return render(request, 'lecture/lecture.html', context)
 
 
 def data(request, mpid):
     q = LectureWatchQuery(mpid)
     resp = q.execute()
     return JsonResponse(resp.to_dict())
-
-
-def histogram(request, mpid):
-    # Need to fill in course_name, lecture number, etc
-    context = {'mpid': mpid}
-    return render(request, 'lecture/histogram.html', context)

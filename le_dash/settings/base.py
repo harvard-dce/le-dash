@@ -28,6 +28,7 @@ ALLOWED_HOSTS = ['*']
 INSTALLED_APPS = [
     'lecture.apps.LectureConfig',
     'attendance.apps.AttendanceConfig',
+    'le_dash_common.apps.LeDashCommonConfig',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
