@@ -6,3 +6,4 @@ lxml==3.6.4
 requests==2.12.1
 six==1.10.0
 whitenoise==3.2.2
+django-bower==5.2.0
