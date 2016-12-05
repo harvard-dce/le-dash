@@ -2,16 +2,20 @@
 {% load static %}
 {% load common_tags %}
 
+{% block page_title %}
+    Viewing Histogram for {{ episode.course }}: {{ episode.title }}
+{% endblock %}
+
 {% block content %}
 
     <div class="row">
         <div class="col-md-12">
-            <h3>{{ episode.course }}</h3>
+            <h3>Viewing Histogram</h3>
         </div>
     </div>
     <div class="row">
         <div class="col-md-12">
-            <h3>{{ episode.title }}</h3>
+            <h5>{{ episode.course }}: {{ episode.title }}</h5>
         </div>
     </div>
     <div class="row">
@@ -20,17 +24,13 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-md-12 text-center">
+        <div class="col-md-12 text-center histogram">
             <graph/>
         </div>
     </div>
     <div class="row">
         <div class="col-md-12">
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-12">
-            <strong>Attendance</strong>:
+            <strong>Attendance Report</strong>:
             <a href="{% url 'attendance-lecture' episode.mpid %}">Lecture</a>
             |
             <a href="{% url 'attendance-series' episode.series %}">Course</a><br/>

@@ -6,6 +6,11 @@ def no_requests(monkeypatch):
     monkeypatch.delattr("requests.sessions.Session.request")
 
 
+@pytest.fixture(autouse=True)
+def no_searches(monkeypatch):
+    monkeypatch.delattr("elasticsearch.Elasticsearch.search")
+
+
 @pytest.fixture()
 def student_maker():
     def _student_maker(huid, first_name, mi, last_name, status='Registered'):

@@ -30,7 +30,9 @@ def index(request):
 
 def series(request, series_id):
     students = rollcall.series(series_id)
+    episode = Episode.findone(series=series_id)
     context = {
+        'episode': episode,
         'series_id': series_id,
         'attendance': students
     }
@@ -39,8 +41,10 @@ def series(request, series_id):
 
 def lecture(request, mpid):
     students = rollcall.lecture(mpid)
+    episode = Episode.findone(mpid=mpid)
     context = {
         'mpid': mpid,
+        'episode': episode,
         'attendance': students
     }
     return render(request, 'attendance/lecture.html', context)

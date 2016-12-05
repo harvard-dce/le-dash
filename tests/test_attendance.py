@@ -1,7 +1,14 @@
-from collections import namedtuple
+from datetime import datetime
+from le_dash.es import Episode
 
 
 def test_series(client, mocker, student_list_maker):
+
+    ep = Episode({
+        'series': '20170110207',
+        'course': 'Foo Studies'
+    })
+    mocker.patch('le_dash.es.Episode.findone', return_value=ep)
 
     student_list = student_list_maker(
         ('12345', 'Abigail', 'Q', 'Adams'),
@@ -12,7 +19,7 @@ def test_series(client, mocker, student_list_maker):
                  return_value=student_list)
 
     response = client.get('/attendance/series/20170110207/')
-    assert b'report for series 20170110207' in response.content
+    assert b'Foo Studies' in response.content
     assert b'<td>Serena S Williams</td>' in response.content
 
 
@@ -30,6 +37,16 @@ def test_series_404(client):
 
 def test_lecture(client, mocker, student_list_maker):
 
+    ep = Episode({
+        'series': '20170110207',
+        'title': 'Lecture 11',
+        'mpid': 'ea00b6b4-713a-48e2-9b3d-500504aa7615',
+        'course': 'Baz 101',
+        'duration': 101010101,
+        'start': datetime.now()
+    })
+    mocker.patch('le_dash.es.Episode.findone', return_value=ep)
+
     student_list = student_list_maker(
         ('45678', 'Paul', 'S', 'Rudd'),
         ('67890', 'Twilight', 'P', 'Sparkle'),
@@ -38,14 +55,11 @@ def test_lecture(client, mocker, student_list_maker):
     mocker.patch('le_dash.rollcall.get_student_list',
                  return_value=student_list)
 
-    fake_episode = namedtuple('FakeEpisode', 'series')._make(('foo',))
-    mocker.patch('le_dash.rollcall.Episode.findone', return_value=fake_episode)
-
     response = client.get(
         '/attendance/lecture/ea00b6b4-713a-48e2-9b3d-500504aa7615/'
     )
-    assert b'report for lecture ea00b6b4-713a-48e2-9b3d-500504aa7615' \
-           in response.content
+    assert b'Baz 101' in response.content
+    assert b'Lecture 11' in response.content
     assert b'<td>Twilight P Sparkle</td>' in response.content
     assert b'<td>837465</td>' in response.content
 

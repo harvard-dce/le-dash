@@ -84,3 +84,13 @@ footer .footer-nav {
   margin-right: 25px;
   list-style: none;
 }
+
+#report-table_wrapper {
+  margin-top: 60px;
+  margin-bottom: 60px;
+}
+
+div.histogram {
+  margin-top: 60px;
+  margin-bottom: 60px;
+}
