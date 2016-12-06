@@ -1,9 +1,9 @@
 from le_dash import es
-from le_dash.rollcall import SeriesAttendance
+from le_dash.rollcall import SeriesAttendance, Student
 
 
 def test_series_attendance(student_maker):
-    student = student_maker('12345', 'Franklin', 'D', 'Roosevelt')
+    student = Student(student_maker('12345', 'Franklin', 'D', 'Roosevelt'))
     att = SeriesAttendance('20160145678', student)
     assert att.huid == '12345'
     assert att.name == 'Franklin D Roosevelt'

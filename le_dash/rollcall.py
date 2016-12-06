@@ -5,16 +5,29 @@ from le_dash.es import Episode, StudentWatchQuery
 
 
 def series(series_id, sort_key='student.last_name'):
-    student_itr = get_student_list(series_id)
-    attendance = [SeriesAttendance(series_id, x) for x in student_itr]
+    student_list = get_student_list(series_id)
+    attendance = [
+        SeriesAttendance(series_id, Student(x)) for x in student_list
+        ]
     return sorted(attendance, key=attrgetter(sort_key))
 
 
 def lecture(mpid, sort_key='student.last_name'):
     episode = Episode.findone(mpid=mpid)
-    student_itr = get_student_list(episode.series)
-    attendance = [LectureAttendance(mpid, x) for x in student_itr]
+    student_list = get_student_list(episode.series)
+    attendance = [LectureAttendance(mpid, Student(x)) for x in student_list]
     return sorted(attendance, key=attrgetter(sort_key))
+
+
+class Student(object):
+
+    def __init__(self, student_dict):
+        self.student_dict = student_dict
+
+    def __getattr__(self, item):
+        if item in self.student_dict:
+            return self.student_dict[item]
+        raise AttributeError()
 
 
 class Attendance(object):

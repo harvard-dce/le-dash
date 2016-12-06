@@ -46,7 +46,7 @@ def student(request, huid):
 
 
 def series_student_data(request, series_id):
-    student_data = list(banner.get_student_list(series_id, raw=True))
+    student_data = banner.get_student_list(series_id)
     return JsonResponse({"students": student_data})
 
 
@@ -57,7 +57,7 @@ def data(request, mpid):
 
     episode = Episode.findone(mpid=mpid)
     if episode:
-        student_data = list(banner.get_student_list(episode.series, raw=True))
+        student_data = banner.get_student_list(episode.series)
         results['students'] = student_data
 
     return JsonResponse(results)
