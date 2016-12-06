@@ -105,11 +105,20 @@ def summarytable(request, mpid):
 def series_viewing_data(request, series_id):
     q = SeriesWatchQuery(series_id)
     resp = q.execute()
-    return JsonResponse(resp.to_dict())
+    results = resp.to_dict()
+    episodes_dump = Episode.findall(series=series_id, size=999)
+    if episodes_dump:
+        episodes = [{"mpid": episode.mpid,
+                     "title": episode.title,
+                     "type": episode.type,
+                     "duration": episode.duration}
+                    for episode in episodes_dump]
+        results["episodes"] = episodes
+
+    return JsonResponse(results)
 
 
 def series_viewing(request, series_id):
-    # Need to fill in course_name, lecture title, etc
     context = {'series_id': series_id}
     episode = Episode.findone(series=series_id)
     if episode:

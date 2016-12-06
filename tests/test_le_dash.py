@@ -20,3 +20,14 @@ def test_lecture_watch_query_const():
     # use of .get() is just to avoid over-long line
     assert q_dict['aggs']['by_inpoint']['aggs']['by_user'] \
         .get('aggs')['by_period']['date_histogram']['interval'] == '99d'
+
+
+def test_series_watch_query():
+    q_dict = es.SeriesWatchQuery('bar').to_dict()
+    assert \
+        q_dict['query']['bool']['must'][0]['match']['episode.series'] == 'bar'
+
+
+def test_student_watch_query():
+    q_dict = es.StudentWatchQuery('bar').to_dict()
+    assert q_dict['query']['bool']['must'][0]['match']['mpid'] == 'bar'

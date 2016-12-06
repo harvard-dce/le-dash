@@ -23,16 +23,16 @@ $(document).ready(function() {
 function format_student_name(student){
     return (
         student.first_name+" "+
-        (typeof(student.mi)=="string"?(student.mi+" "):"")+
+        //(typeof(student.mi)=="string"?(student.mi+" "):"")+
         student.last_name
     );
 }
 
 d3.json("{% url 'attendance-data' mpid %}", function(error, data) {
-  if (error) throw error;
+    if (error) throw error;
+    //console.log(data);
     var students = {};
     if (data.students) {
-        //console.log(data.students);
         for (index in data.students) {
             //console.log(data.students[index]);
             students[ data.students[index].huid ] = {
@@ -58,13 +58,10 @@ d3.json("{% url 'attendance-data' mpid %}", function(error, data) {
     // combine the datasets
     //nested.map( function(d,i) { if (d.key==total_time[i].key) return d.total= total_time[i].values; });
     nested.map( function(d,i) {
-        if (d.key==total_time[i].key) {
+        if (d.key==total_time[i].key)
             d.total= total_time[i].values;
-            if (students[d.key])
-                d.student = students[d.key].name;
-            else
-                d.student = d.key;
-        }
+        //if (students[d.key]) d.key = students[d.key].name +" ("+d.key+")";
+        return d;
     });
     //console.log(nested);
 
@@ -86,7 +83,7 @@ d3.json("{% url 'attendance-data' mpid %}", function(error, data) {
     if (nested.length < 5) height += bar_height*2;
 
     // margins
-    var margin = {top: 30, right: 60, bottom: 30, left: 100},
+    var margin = {top: 30, right: 60, bottom: 30, left: 250},
         w = width - margin.left - margin.right,
         h = height - margin.top - margin.bottom;
 
@@ -100,7 +97,12 @@ d3.json("{% url 'attendance-data' mpid %}", function(error, data) {
 
     var xAxis = d3.svg.axis().scale(x).orient("top").tickSize(4)
         .tickFormat(formatSeconds);
-        yAxis = d3.svg.axis().scale(y).orient("left").tickSize(0);
+        yAxis = d3.svg.axis().scale(y).orient("left").tickSize(0)
+        .tickFormat( function(d) {
+            if (students[d]) return students[d].name;
+            else return d;
+            })
+        ;
 
     var svg = d3.select("#chart").append("svg")
         .attr("width", w + margin.left + margin.right)
@@ -111,7 +113,7 @@ d3.json("{% url 'attendance-data' mpid %}", function(error, data) {
     // create the points
     mydata = nested.map(function(d) {
     return {
-        key: d.student,
+        key: d.key,
         points: d.values[0].map(function (v) {
             return {
                 x: v,
@@ -122,7 +124,7 @@ d3.json("{% url 'attendance-data' mpid %}", function(error, data) {
     });
 
     // Set the scale domain.
-    y.domain( nested.map(function(d) { return d.key; }));
+    y.domain( mydata.map(function(d) { return d.key; }));
     var max=duration;
     var localmax = d3.max( nested, function(g) {
                     return d3.max( g.values, function(d) {
@@ -133,8 +135,7 @@ d3.json("{% url 'attendance-data' mpid %}", function(error, data) {
     }
     max *= 1.1;               // extra space for text 
     x.domain([0, max ]);
-    var box_width = max/w * 7000.0/duration ;  // each box is 60 seconds - assume 2 hour range
-    //console.log(box_width + " "+ duration);
+    var box_width = max/w * 7000.0/duration ;  // each box is 60 seconds - assume 2 hour range is usual
 
     var scatterChartContainer = svg.append("g")
     .attr('class', 'scatterCharts')
@@ -205,7 +206,7 @@ d3.json("{% url 'attendance-data' mpid %}", function(error, data) {
           .attr("x",-h/2)
           .attr("y",-margin.left *2 )
           .attr("dy", ".71em")
-          .text("Student (HUID)");
+          .text("Viewers (Registered Students are listed by name)");
 
     scatterChartContainer.append("g")
           .attr("class", "scatterPlot y axis")

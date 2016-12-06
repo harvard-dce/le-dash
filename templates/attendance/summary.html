@@ -36,9 +36,11 @@ function format_student_data(student){
     return(
         student.first_name+" "+
             (typeof(student.mi)=="string"?(student.mi+" "):"")+
-            student.last_name+"("+
-            student.reg_level+")"+
+            student.last_name+
+            "("+student.reg_level+")"+
             "<br>"+
+            //student.status + "<br>"+
+            student.dce_id + "<br>"+
             student.huid+
             "<br>"+
             student.email
@@ -51,7 +53,6 @@ var div = d3.select("body").append("div")
 
 d3.json("{% url 'attendance-data' mpid %}", function(error, data) {
     if (error) throw error;
-
     var duration = getStudentViewDuration(data);
 
     var nested = d3.nest()
@@ -71,6 +72,14 @@ d3.json("{% url 'attendance-data' mpid %}", function(error, data) {
                "name": format_student_name( data.students[index])
             }
         }
+        nested.map(function(d){
+            if (students[d.key]) {
+                 d.student = students[d.key].name+" ("+d.key+")"
+            }
+            else
+                 d.student = d.key
+            return d;
+        });
     }
 
     // in descending order
@@ -84,8 +93,8 @@ d3.json("{% url 'attendance-data' mpid %}", function(error, data) {
       return 0;
     });
 
-    var width = 800, bar_height=30;
-    var margin = {top: 50, right: 60, bottom: 30, left: 100};
+    var width = 1000, bar_height=30;
+    var margin = {top: 50, right: 60, bottom: 30, left: 200};
     // height is based on number of entries 
     var height = nested.length * bar_height +  margin.top + margin.bottom;
 
@@ -108,7 +117,12 @@ d3.json("{% url 'attendance-data' mpid %}", function(error, data) {
 
     var xAxis = d3.svg.axis().scale(x).orient("top").tickSize(0)
         .tickFormat(formatSeconds);
-        yAxis = d3.svg.axis().scale(y).orient("left").tickSize(0);
+        yAxis = d3.svg.axis().scale(y).orient("left").tickSize(0)
+        .tickFormat(function(d){
+            if (students[d]) return students[d].name
+            else  return d
+        });
+        ;
 
     var svg = d3.select("#chart").append("svg")
         .attr("width", width)
@@ -176,7 +190,7 @@ d3.json("{% url 'attendance-data' mpid %}", function(error, data) {
           .attr("dy", ".71em")
           .style("text-anchor", "left")
           .attr("transform", "rotate(-90)")
-          .text("HUID");
+          .text("Viewers (Registered Students are named)");
 
 });
 });
