@@ -9,9 +9,11 @@
 {{ series_id }}
 </h3>
 <div id="summary"></div>
-<br>
-Check on the bar to see student viewing percentage for each lecture
-<br>
+<br/>
+Click on the lecture name to see number of times each section has been viewed
+<br/>
+Click on the bar to see student viewing percentage for each lecture
+<br/>
 <div id="chart"></div>
 <br>
 
@@ -45,32 +47,21 @@ d3.json("{% url 'attendance-series-viewing-data' series_id %}", function(error, 
         .entries(data.aggregations.by_mpid.buckets);
 
     var episodes={};
+    // Process episode data
     if (data.episodes) {
         for (index in data.episodes) {
-            //console.log( (data.episodes)[index]);
             episodes[ data.episodes[index].mpid ] = 
             {
                 title: data.episodes[index].title+
                        " ("+ data.episodes[index].type+")"+
                        " ("+ formatSeconds(data.episodes[index].duration/1000)+")",
-                type: data.episodes[index].type
             }
         }
-        nested.map(function(d){
-            if (episodes[d.key]) {
-                 d.title = episodes[d.key].title
-                 d.type = episodes[d.key].type
-            }
-            else {
-                 d.title = d.key
-                 d.type = "ZZZZ"
-            }
-            return d;
-        });
+        // append episode type to aggregation
+        nested.map(function(d){ if (episodes[d.key]) { d.type = episodes[d.key].type } else { d.type = "zzzz" } return d; });
     }
-    console.log(nested);
 
-    // in ascending order
+    // sort by episode type in ascending order
     nested.sort(function (a, b) {
       if (a.type < b.type) {
         return -1;
@@ -90,7 +81,7 @@ d3.json("{% url 'attendance-series-viewing-data' series_id %}", function(error, 
     var w = width - margin.left - margin.right,
         h = height - margin.top - margin.bottom;
 
-
+    var formatEpisode= function(d) { if (episodes[d]) return episodes[d].title; else return d; };
     var max = d3.max( nested, function(d) { return d.values; });
     var mean = d3.mean( nested, function(d) { return d.values; });
     var median = d3.median( nested, function(d) { return d.values; });
@@ -102,16 +93,9 @@ d3.json("{% url 'attendance-series-viewing-data' series_id %}", function(error, 
         y = d3.scale.ordinal().rangeRoundBands([0, h], .1);
 
     var xAxis = d3.svg.axis().scale(x).orient("top").tickSize(0)
-        .tickFormat(formatCount);
+        .tickFormat(formatCount),
         yAxis = d3.svg.axis().scale(y).orient("left").tickSize(0)
-        .tickFormat(function(d) {
-            if (episodes[d])
-                return episodes[d].title;
-            else
-                return d;
-        })
-        ;
-
+        .tickFormat(formatEpisode);
 
     var svg = d3.select("#chart").append("svg")
         .attr("width", width)
@@ -167,6 +151,15 @@ d3.json("{% url 'attendance-series-viewing-data' series_id %}", function(error, 
           .attr("dy", ".71em")
           .style("text-anchor", "left")
           .text("Video");
+
+    // Make y axis labels a link to lecture viewing
+    d3.selectAll("text")
+        .filter(function(d){ return typeof(d) == "string"; })
+        .style("cursor", "pointer")
+        .on("click", function(d){
+            document.location.href = "/lecture/" + d;
+        })
+
 
 });
 });

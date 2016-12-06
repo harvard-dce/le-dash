@@ -1,17 +1,22 @@
 {% extends 'd3_base.html' %}
 
 {% block content %}
-<h1> {{ title }} </h1>
+<h1> {{ title }} - Detailed Student Viewing </h1>
 <h3> {{ course_name }} {{ series }} </h3>
 Minutes of the video viewed at least once. (Resolution is 1 minute )
 <br>
 <UL>
 <LI><a href="{% url 'attendance-summary' mpid %}">Student viewing summary</a>
-<LI><a href="{% url 'attendance-summarytable' mpid %}">Student viewing Table</a>
+{% if series %}
+<LI><a href="{% url 'attendance-series' series %}">Student series attendance table</a>
+<LI><a href="{% url 'attendance-series-viewing' series %}">Series viewing by students</a>
+{% else %}
+<LI>No series information found
+{% endif %}
 </ul>
 <div id="chart"></div>
 
-    {% endblock %}
+{% endblock %}
 
 {% block js %}
 {{ block.super }}
@@ -203,6 +208,7 @@ d3.json("{% url 'attendance-data' mpid %}", function(error, data) {
     scatterChartContainer.append("text")
           .attr("class", "scatterPlot x axis")
           .attr("transform", "rotate(-90)")
+          .style("text-anchor", "middle")
           .attr("x",-h/2)
           .attr("y",-margin.left *2 )
           .attr("dy", ".71em")

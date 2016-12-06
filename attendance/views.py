@@ -15,8 +15,13 @@ def index(request):
         form = SeriesForm(request.POST)
         if form.is_valid():
             series_id = form.cleaned_data['series_id'].strip()
-            return HttpResponseRedirect(reverse(
-                'attendance-series', args=(series_id,)))
+            display = form.cleaned_data['display'].strip()
+            if display == "table":
+                return HttpResponseRedirect(reverse(
+                    'attendance-series', args=(series_id,)))
+            else:
+                return HttpResponseRedirect(reverse(
+                    'attendance-series-viewing', args=(series_id,)))
     else:
         form = SeriesForm()
 

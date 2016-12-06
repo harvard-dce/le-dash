@@ -2,16 +2,21 @@
 
 {% block content %}
 
-<h1> {{ title }} </h1>
+<h1> {{ title }} - Student Viewing Summary </h1>
 <h3> {{ course_name }} {{ series }} </h3>
-Portion of the video viewed at least once. (Resolution is 1 minute)
+Percentage of the video viewed at least once. (Resolution is 1 minute)
 <br>
 <div id="summary"></div>
 <div id="table"></div>
 <br>
 <UL>
-<LI><a href="{% url 'attendance-detailed' mpid %}">Detailed student viewing</a>
-<LI><a href="{% url 'attendance-summarytable' mpid %}">Student viewing Table</a>
+<LI><a href="{% url 'attendance-detailed' mpid %}">Detailed student viewing graph</a>
+{% if series %}
+<LI><a href="{% url 'attendance-series' series %}">Student series attendance table</a>
+<LI><a href="{% url 'attendance-series-viewing' series %}">Series viewing by students</a>
+{% else %}
+<LI>No series information found
+{% endif %}
 </UL>
 
 <div id="summary"></div>
@@ -72,14 +77,8 @@ d3.json("{% url 'attendance-data' mpid %}", function(error, data) {
                "name": format_student_name( data.students[index])
             }
         }
-        nested.map(function(d){
-            if (students[d.key]) {
-                 d.student = students[d.key].name+" ("+d.key+")"
-            }
-            else
-                 d.student = d.key
-            return d;
-        });
+        nested.map(function(d){ if (students[d.key]) {
+            d.student = students[d.key].name+" ("+d.key+")"; } else d.student = d.key; return d; });
     }
 
     // in descending order
@@ -93,10 +92,13 @@ d3.json("{% url 'attendance-data' mpid %}", function(error, data) {
       return 0;
     });
 
-    var width = 1000, bar_height=30;
+    var width = 1000, bar_height=30, min_height=300;
     var margin = {top: 50, right: 60, bottom: 30, left: 200};
     // height is based on number of entries 
     var height = nested.length * bar_height +  margin.top + margin.bottom;
+
+    if (height < min_height)
+        height = min_height;
 
     var w = width - margin.left - margin.right,
         h = height - margin.top - margin.bottom;
@@ -104,6 +106,7 @@ d3.json("{% url 'attendance-data' mpid %}", function(error, data) {
     var formatCount = d3.format(",.0f"),
         formatPercent = d3.format(".0%"), 
         formatTime = d3.time.format("%H:%M"), 
+        formatStudent = function(d) { if (students[d]) return students[d].name; else return d; },
         formatSeconds = function(d) { return formatTime(new Date(2016, 0, 1, 0, 0, d)); };
 
     var mean = d3.mean( nested, function(d) { return d.values; });
@@ -118,11 +121,7 @@ d3.json("{% url 'attendance-data' mpid %}", function(error, data) {
     var xAxis = d3.svg.axis().scale(x).orient("top").tickSize(0)
         .tickFormat(formatSeconds);
         yAxis = d3.svg.axis().scale(y).orient("left").tickSize(0)
-        .tickFormat(function(d){
-            if (students[d]) return students[d].name
-            else  return d
-        });
-        ;
+        .tickFormat(formatStudent);
 
     var svg = d3.select("#chart").append("svg")
         .attr("width", width)
@@ -185,10 +184,10 @@ d3.json("{% url 'attendance-data' mpid %}", function(error, data) {
           .attr("class", "y axis")
           .call(yAxis)
           .append("text")
-          .attr("y", -margin.left + 10)
+          .attr("y", -margin.left + 10 )
           .attr("x", -h/2)
           .attr("dy", ".71em")
-          .style("text-anchor", "left")
+          .style("text-anchor", "middle")
           .attr("transform", "rotate(-90)")
           .text("Viewers (Registered Students are named)");
 
