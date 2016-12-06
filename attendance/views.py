@@ -46,8 +46,8 @@ def student(request, huid):
 
 
 def series_student_data(request, series_id):
-    students = [student for student in banner.get_student_list_raw(series_id)]
-    return JsonResponse({"students": students})
+    student_data = list(banner.get_student_list(series_id, raw=True))
+    return JsonResponse({"students": student_data})
 
 
 def data(request, mpid):
@@ -57,9 +57,8 @@ def data(request, mpid):
 
     episode = Episode.findone(mpid=mpid)
     if episode:
-        students = [student for student in
-                    banner.get_student_list_raw(episode.series)]
-        results["students"] = students
+        student_data = list(banner.get_student_list(episode.series, raw=True))
+        results['students'] = student_data
 
     return JsonResponse(results)
 
@@ -111,11 +110,8 @@ def series_viewing_data(request, series_id):
 
 def series_viewing(request, series_id):
     # Need to fill in course_name, lecture title, etc
-    course_info = banner.get_course_info(series_id)
-    if course_info:
-        context = {'series_id': series_id,
-                   'course_name': course_info['course_name'],
-                   'course_title': course_info['course_title']}
-    else:
-        context = {'series_id': series_id}
+    context = {'series_id': series_id}
+    episode = Episode.findone(series=series_id)
+    if episode:
+        context['episode'] = episode
     return render(request, 'attendance/series_viewing.html', context)
