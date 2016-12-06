@@ -39,7 +39,7 @@ def test_lecture(client, mocker, student_list_maker):
                  return_value=student_list)
 
     fake_episode = namedtuple('FakeEpisode', 'series')._make(('foo',))
-    mocker.patch('le_dash.rollcall.episode_lookup', return_value=fake_episode)
+    mocker.patch('le_dash.rollcall.Episode.findone', return_value=fake_episode)
 
     response = client.get(
         '/attendance/lecture/ea00b6b4-713a-48e2-9b3d-500504aa7615/'

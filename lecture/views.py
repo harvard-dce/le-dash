@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
-from le_dash.es import LectureWatchQuery, episode_lookup
+from le_dash.es import LectureWatchQuery, Episode
 
 from .forms import MpidForm
 
@@ -20,7 +20,7 @@ def index(request):
 
 
 def lecture(request, mpid):
-    episode = episode_lookup(mpid=mpid)
+    episode = Episode.findone(mpid=mpid)
     context = {'mpid': mpid, 'episode': episode}
     return render(request, 'lecture/lecture.html', context)
 

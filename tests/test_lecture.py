@@ -12,7 +12,7 @@ def test_lecture(client, mocker):
         'series': '20170156789',
         'start': datetime.now()
     })
-    mocker.patch('lecture.views.episode_lookup', return_value=ep)
+    mocker.patch('lecture.views.Episode.findone', return_value=ep)
 
     response = client.get('/lecture/ea00b6b4-713a-48e2-9b3d-500504aa7615/')
     assert b'Foo 101' in response.content

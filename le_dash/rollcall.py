@@ -1,7 +1,7 @@
 import random
 from operator import attrgetter
 from le_dash.banner import get_student_list
-from le_dash.es import episode_lookup, StudentWatchQuery
+from le_dash.es import Episode, StudentWatchQuery
 
 
 def series(series_id, sort_key='student.last_name'):
@@ -11,7 +11,7 @@ def series(series_id, sort_key='student.last_name'):
 
 
 def lecture(mpid, sort_key='student.last_name'):
-    episode = episode_lookup(mpid=mpid)
+    episode = Episode.findone(mpid=mpid)
     student_itr = get_student_list(episode.series)
     attendance = [LectureAttendance(mpid, x) for x in student_itr]
     return sorted(attendance, key=attrgetter(sort_key))

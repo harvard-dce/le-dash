@@ -30,9 +30,12 @@ class ESQuery(object):
 
 
 class EpisodeQuery(ESQuery):
-    def __init__(self, **kwargs):
+    def __init__(self, size=None, **kwargs):
         self.index = settings.ES_INDEX_PATTERNS['episodes']
         super(EpisodeQuery, self).__init__()
+
+        if size is not None:
+            self.search = self.search.extra(size=size)
 
         for field, value in kwargs.items():
             self.search = self.search.query("match", **{field: value})
@@ -144,6 +147,21 @@ class SeriesWatchQuery(UserActionQuery):
 
 
 class Episode(object):
+
+    @staticmethod
+    def findone(**kwargs):
+        q = EpisodeQuery(size=1, **kwargs)
+        resp = q.execute()
+        if resp.hits.total:
+            return Episode(resp.hits[0])
+        return
+
+    @staticmethod
+    def findall(**kwargs):
+        q = EpisodeQuery(**kwargs)
+        resp = q.execute()
+        return [Episode(x) for x in resp.hits]
+
     def __init__(self, doc):
         self.doc = doc
 
@@ -151,11 +169,3 @@ class Episode(object):
         if item in self.doc:
             return self.doc[item]
         raise AttributeError()
-
-
-def episode_lookup(**kwargs):
-    q = EpisodeQuery(**kwargs)
-    resp = q.execute()
-    if resp.hits.total == 1:
-        return Episode(resp.hits[0])
-    return

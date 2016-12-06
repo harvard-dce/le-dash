@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.urls import reverse
 
 from le_dash import rollcall, banner
-from le_dash.es import StudentWatchQuery, SeriesWatchQuery, episode_lookup
+from le_dash.es import StudentWatchQuery, SeriesWatchQuery, Episode
 
 from .forms import SeriesForm
 
@@ -55,7 +55,7 @@ def data(request, mpid):
     resp = q.execute()
     results = resp.to_dict()
 
-    episode = episode_lookup(mpid=mpid)
+    episode = Episode.findone(mpid=mpid)
     if episode:
         students = [student for student in
                     banner.get_student_list_raw(episode.series)]
@@ -65,7 +65,7 @@ def data(request, mpid):
 
 
 def summary(request, mpid):
-    episode = episode_lookup(mpid=mpid)
+    episode = Episode.findone(mpid=mpid)
     if episode:
         context = {'mpid': mpid,
                    'title': episode.title,
@@ -78,7 +78,7 @@ def summary(request, mpid):
 
 
 def detailed(request, mpid):
-    episode = episode_lookup(mpid=mpid)
+    episode = Episode.findone(mpid=mpid)
     if episode:
         context = {'mpid': mpid,
                    'title': episode.title,
@@ -92,7 +92,7 @@ def detailed(request, mpid):
 def summarytable(request, mpid):
     students = rollcall.LectureAttendanceByAllStudents(mpid).all_scores()
     try:
-        episode = episode_lookup(mpid=mpid)
+        episode = Episode.findone(mpid=mpid)
         context = {'students': students,
                    'title': episode.title,
                    'course_name': episode.course,
