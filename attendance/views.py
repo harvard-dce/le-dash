@@ -5,7 +5,8 @@ from django.shortcuts import render
 from django.urls import reverse
 
 from le_dash import rollcall, banner
-from le_dash.es import StudentWatchQuery, SeriesWatchQuery, Episode
+from le_dash.es import Episode, Series, SeriesViewingQuery, \
+    StudentSummaryWatchQuery
 
 from .forms import SeriesForm
 
@@ -29,23 +30,22 @@ def index(request):
 
 
 def series(request, series_id):
-    students = rollcall.series(series_id)
-    episode = Episode.findone(series=series_id)
+    series = Series(series_id)
+    attendance = rollcall.series_attendance(series.id)
     context = {
-        'episode': episode,
-        'series_id': series_id,
-        'attendance': students
+        'series': series,
+        'attendance': attendance
     }
     return render(request, 'attendance/series.html', context)
 
 
 def lecture(request, mpid):
-    students = rollcall.lecture(mpid)
     episode = Episode.findone(mpid=mpid)
+    attendance = rollcall.lecture_attendance(episode.mpid)
     context = {
         'mpid': mpid,
         'episode': episode,
-        'attendance': students
+        'attendance': attendance
     }
     return render(request, 'attendance/lecture.html', context)
 
@@ -60,7 +60,7 @@ def series_student_data(request, series_id):
 
 
 def data(request, mpid):
-    q = StudentWatchQuery(mpid)
+    q = StudentSummaryWatchQuery(mpid)
     resp = q.execute()
     results = resp.to_dict()
 
@@ -112,7 +112,7 @@ def summarytable(request, mpid):
 
 
 def series_viewing_data(request, series_id):
-    q = SeriesWatchQuery(series_id)
+    q = SeriesViewingQuery(series_id)
     resp = q.execute()
     results = resp.to_dict()
     episodes_dump = Episode.findall(series=series_id, size=999)
@@ -128,8 +128,6 @@ def series_viewing_data(request, series_id):
 
 
 def series_viewing(request, series_id):
-    context = {'series_id': series_id}
-    episode = Episode.findone(series=series_id)
-    if episode:
-        context['episode'] = episode
+    series = Series(series_id)
+    context = {'series': series}
     return render(request, 'attendance/series_viewing.html', context)

@@ -3,10 +3,10 @@
 {% block content %}
 
 <h1>
-{{ episode.course }}
+{{ series.course_name }}
 </h1>
 <h3>
-{{ series_id }}
+{{ series.id }}
 </h3>
 <div id="summary"></div>
 <br/>
@@ -36,7 +36,7 @@ var formatCount = d3.format(",d"),
     formatTime = d3.time.format("%H:%M"), 
     formatSeconds = function(d) { return formatTime(new Date(2016, 0, 1, 0, 0, d)); };
 
-d3.json("{% url 'attendance-series-viewing-data' series_id %}", function(error, data) {
+d3.json("{% url 'attendance-series-viewing-data' series.id %}", function(error, data) {
     if (error) throw error;
 
     var nested= d3.nest()

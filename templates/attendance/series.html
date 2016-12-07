@@ -1,7 +1,7 @@
 {% extends 'attendance/base.html' %}
 
 {% block page_title %}
-    Attendance Report for {{ episode.course }}
+    Attendance Report for {{ series.course_name }}
 {% endblock %}
 
 {% block content %}
@@ -13,7 +13,7 @@
     </div>
     <div class="row">
         <div class="col-md-12">
-            <h5>{{ episode.course }}</h5>
+            <h5>{{ series.course_name }}</h5>
         </div>
     </div>
     <div class="row">
@@ -22,13 +22,15 @@
                 <thead>
                     <td>Name</td>
                     <td>HUID</td>
-                    <td>% Lectures Viewed</td>
+                    <td>Status</td>
+                    <td>Lectures Viewed</td>
                 </thead>
-            {% for student in attendance %}
+            {% for row in attendance %}
                 <tr>
-                    <td>{{ student.name }}</td>
-                    <td>{{ student.huid }}</td>
-                    <td>{{ student.score }}</td>
+                    <td>{{ row.student.name }}</td>
+                    <td>{{ row.student.huid }}</td>
+                    <td>{{ row.student.status }}</td>
+                    <td>{{ row.lectures_watched }} of {{ series.total_lectures }}</td>
                 </tr>
             {% endfor %}
             </table>

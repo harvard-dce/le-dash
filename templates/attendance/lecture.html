@@ -23,13 +23,15 @@
                 <thead>
                     <td>Name</td>
                     <td>HUID</td>
+                    <td>Status</td>
                     <td>% Viewed</td>
                 </thead>
-            {% for student in attendance %}
+            {% for row in attendance %}
                 <tr>
-                    <td>{{ student.name }}</td>
-                    <td>{{ student.huid }}</td>
-                    <td>{{ student.score }}</td>
+                    <td>{{ row.student.name }}</td>
+                    <td>{{ row.student.huid }}</td>
+                    <td>{{ row.student.status }}</td>
+                    <td>{{ row.score }}</td>
                 </tr>
             {% endfor %}
             </table>

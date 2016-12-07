@@ -1,26 +1,34 @@
 from datetime import datetime
 from le_dash.es import Episode
+from le_dash.rollcall import Student
+from mock import Mock
 
 
-def test_series(client, mocker, student_list_maker):
-
-    ep = Episode({
-        'series': '20170110207',
-        'course': 'Foo Studies'
-    })
-    mocker.patch('le_dash.es.Episode.findone', return_value=ep)
-
+def test_series_attendance_view(client, mocker, student_list_maker):
     student_list = student_list_maker(
         ('12345', 'Abigail', 'Q', 'Adams'),
         ('23456', 'Corin', '', 'Tucker'),
         ('34567', 'Serena', 'S', 'Williams')
     )
-    mocker.patch('le_dash.rollcall.get_student_list',
-                 return_value=student_list)
+    watched = [3, 9, 13]
+    mock_attendance = []
+    for student in student_list:
+        mock_attendance.append({
+            'student': Student(student),
+            'lectures_watched': watched.pop(0)
+        })
+    mocker.patch('le_dash.rollcall.series_attendance',
+                 return_value=mock_attendance)
+    mock_series = Mock(id='20170110207',
+                       course_name='Foo Studies',
+                       total_lectures=20
+                       )
+    mocker.patch('le_dash.es.Series', return_value=mock_series)
 
     response = client.get('/attendance/series/20170110207/')
     assert b'Foo Studies' in response.content
     assert b'<td>Serena S Williams</td>' in response.content
+    assert b'<td>9 of 20</td>' in response.content
 
 
 def test_series_no_slash_redirect(client):
@@ -52,8 +60,15 @@ def test_lecture(client, mocker, student_list_maker):
         ('67890', 'Twilight', 'P', 'Sparkle'),
         ('837465', 'Chief', 'C', 'Burns')
     )
-    mocker.patch('le_dash.rollcall.get_student_list',
-                 return_value=student_list)
+    scores = [33, 89, 66]
+    mock_attendance = []
+    for student in student_list:
+        mock_attendance.append({
+            'student': Student(student),
+            'score': scores.pop(0)
+        })
+    mocker.patch('le_dash.rollcall.lecture_attendance',
+                 return_value=mock_attendance)
 
     response = client.get(
         '/attendance/lecture/ea00b6b4-713a-48e2-9b3d-500504aa7615/'
@@ -62,6 +77,7 @@ def test_lecture(client, mocker, student_list_maker):
     assert b'Lecture 11' in response.content
     assert b'<td>Twilight P Sparkle</td>' in response.content
     assert b'<td>837465</td>' in response.content
+    assert b'<td>66</td>' in response.content
 
 
 def test_lecture_404(client):

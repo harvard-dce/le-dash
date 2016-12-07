@@ -89,9 +89,9 @@ function tallyViewCount(data) {
   for (i = 0; i < inpoints.length; i++) {
     var inpoint= inpoints[i];
         // filter out negative inpoints - dirty data?
-    if (inpoint.key > -1 & inpoint.by_user != null ) {
+    if (inpoint.key > -1 & inpoint.by_huid != null ) {
         var sum = 0
-        var users = inpoint.by_user.buckets
+        var users = inpoint.by_huid.buckets
         for (j = 0; j < users.length; j++) {
             var periods = users[j].by_period.buckets
             sum += periods.length;
