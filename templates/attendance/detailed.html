@@ -1,27 +1,17 @@
-{% extends 'd3_base.html' %}
+{% extends "d3_base.html" %}
 
 {% block content %}
-<h1> {{ title }} - Detailed Student Viewing </h1>
-<h3> {{ course_name }} {{ series }} </h3>
-Minutes of the video viewed at least once. (Resolution is 1 minute )
-<br>
-<UL>
-<LI><a href="{% url 'attendance-summary' mpid %}">Student viewing summary</a>
-{% if series %}
-<LI><a href="{% url 'attendance-series' series %}">Student series attendance table</a>
-<LI><a href="{% url 'attendance-series-viewing' series %}">Series viewing by students</a>
-{% else %}
-<LI>No series information found
-{% endif %}
-</ul>
-<div id="chart"></div>
+{{ block.super }}
+
+    <br/>
+    {% include "metadata_lecture.html" %}
 
 {% endblock %}
 
 {% block js %}
 {{ block.super }}
-
 <script type="text/javascript">
+
 
 $(document).ready(function() {
 

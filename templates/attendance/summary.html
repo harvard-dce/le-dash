@@ -1,26 +1,10 @@
-{% extends 'd3_base.html' %}
+{% extends "d3_base.html" %}
 
 {% block content %}
+{{ block.super }}
 
-<h1> {{ title }} - Student Viewing Summary </h1>
-<h3> {{ course_name }} {{ series }} </h3>
-Percentage of the video viewed at least once. (Resolution is 1 minute)
-<br>
-<div id="summary"></div>
-<div id="table"></div>
-<br>
-<UL>
-<LI><a href="{% url 'attendance-detailed' mpid %}">Detailed student viewing graph</a>
-{% if series %}
-<LI><a href="{% url 'attendance-series' series %}">Student series attendance table</a>
-<LI><a href="{% url 'attendance-series-viewing' series %}">Series viewing by students</a>
-{% else %}
-<LI>No series information found
-{% endif %}
-</UL>
-
-<div id="summary"></div>
-<div id="chart"></div>
+    <br/>
+    {% include "metadata_lecture.html" %}
 
 {% endblock %}
 
@@ -53,7 +37,7 @@ function format_student_data(student){
 }
 
 var div = d3.select("body").append("div")
-    .attr("class", "tooltip")               
+    .attr("class", "tooltip")
     .style("opacity", 0);
 
 d3.json("{% url 'attendance-data' mpid %}", function(error, data) {

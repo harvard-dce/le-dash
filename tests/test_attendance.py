@@ -6,7 +6,11 @@ def test_series(client, mocker, student_list_maker):
 
     ep = Episode({
         'series': '20170110207',
-        'course': 'Foo Studies'
+        'course': 'Foo Studies',
+        'title': 'Lecture 11',
+        'mpid': 'ea00b6b4-713a-48e2-9b3d-500504aa7615',
+        'duration': 101010101,
+        'start': datetime.now()
     })
     mocker.patch('le_dash.es.Episode.findone', return_value=ep)
 

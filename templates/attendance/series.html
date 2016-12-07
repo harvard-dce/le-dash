@@ -1,21 +1,9 @@
-{% extends 'attendance/base.html' %}
-
-{% block page_title %}
-    Attendance Report for {{ episode.course }}
-{% endblock %}
+{% extends 'datatables_base.html' %}
 
 {% block content %}
 
-    <div class="row">
-        <div class="col-md-12">
-            <h3>Attendance Report</h3>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-12">
-            <h5>{{ episode.course }}</h5>
-        </div>
-    </div>
+    {% include "chart_title_include.html" %}
+
     <div class="row">
         <div class="col-md-12">
             <table id="report-table" class="display">
@@ -34,6 +22,9 @@
             </table>
         </div>
     </div>
+
+    <br/>
+    {% include "metadata_course.html" %}
 
 {% endblock %}
 

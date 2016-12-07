@@ -1,55 +1,17 @@
 {% extends 'd3_base.html' %}
-{% load static %}
-{% load common_tags %}
-
-{% block page_title %}
-    Viewing Histogram for {{ episode.course }}: {{ episode.title }}
-{% endblock %}
 
 {% block content %}
+{{ block.super }}
 
-    <div class="row">
-        <div class="col-md-12">
-            <h3>Viewing Histogram</h3>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-12">
-            <h5>{{ episode.course }}: {{ episode.title }}</h5>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-12">
-            Number of times a section of the video has been watched (resolution is 5 minutes)
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-12 text-center histogram">
-            <graph/>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-12">
-            <strong>Attendance Report</strong>:
-            <a href="{% url 'attendance-lecture' episode.mpid %}">Lecture</a>
-            |
-            <a href="{% url 'attendance-series' episode.series %}">Course</a><br/>
-            <strong>Series</strong>:
-            {{ episode.series }}<br/>
-            <strong>Mediapackage ID</strong>:
-            {{ episode.mpid }}<br/>
-            <strong>Date</strong>:
-            {{ episode.start }}<br/>
-            <strong>Duration</strong>:
-            {{ episode.duration | video_length }}<br/>
-        </div>
-    </div>
+    <br/>
+    {% include "metadata_lecture.html" %}
 
 {% endblock %}
 
 {% block js %}
 {{ block.super }}
 <script type="text/javascript">
+
 
     $(document).ready(function(){
         // Should change to viewports
@@ -73,7 +35,7 @@
                 yAxis = d3.svg.axis().scale(y).orient("left")
                         .tickFormat(d3.format("d"));
 
-        var svg = d3.select("graph").append("svg")
+        var svg = d3.select("#chart").append("svg")
                 .attr("width", width )
                 .attr("height", height )
                 .append("g")

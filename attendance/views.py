@@ -32,9 +32,14 @@ def series(request, series_id):
     students = rollcall.series(series_id)
     episode = Episode.findone(series=series_id)
     context = {
-        'episode': episode,
-        'series_id': series_id,
-        'attendance': students
+        'episode': {
+            'course': episode.course,
+            'series': episode.series,
+        },
+        'attendance': students,
+        'chart_title': 'Course Attendance per Student',
+        'chart_description':
+            'Number of Lectures Attended per Student',
     }
     return render(request, 'attendance/series.html', context)
 
@@ -45,7 +50,9 @@ def lecture(request, mpid):
     context = {
         'mpid': mpid,
         'episode': episode,
-        'attendance': students
+        'attendance': students,
+        'chart_title': 'Lecture Attendance Report',
+        'chart_description': 'Percent of One Lecture Watched per Student',
     }
     return render(request, 'attendance/lecture.html', context)
 
@@ -75,11 +82,16 @@ def data(request, mpid):
 def summary(request, mpid):
     episode = Episode.findone(mpid=mpid)
     if episode:
-        context = {'mpid': mpid,
-                   'title': episode.title,
-                   'course_name': episode.course,
-                   'series': episode.series,
-                   }
+        context = {
+            'mpid': mpid,
+            'episode': episode,
+            'chart_title': 'Lecture Attendance Report',
+            'chart_description':
+                'Percentage of the Lecture Watched at Least Once. '
+                '(Resolution is 1 Minute)',
+            'course_name': episode.course,
+            'series': episode.series,
+        }
     else:
         context = {'mpid': mpid}
     return render(request, 'attendance/summary.html', context)
@@ -88,10 +100,14 @@ def summary(request, mpid):
 def detailed(request, mpid):
     episode = Episode.findone(mpid=mpid)
     if episode:
-        context = {'mpid': mpid,
-                   'title': episode.title,
-                   'course_name': episode.course,
-                   'series': episode.series}
+        context = {
+            'mpid': mpid,
+            'episode': episode,
+            'chart_title': 'Detailed Lecture Attendance Report',
+            'chart_description':
+                'Minutes of the Video Watched at Least Once. '
+                '(Resolution is 1 Minute)',
+        }
     else:
         context = {'mpid': mpid}
     return render(request, 'attendance/detailed.html', context)
@@ -128,8 +144,17 @@ def series_viewing_data(request, series_id):
 
 
 def series_viewing(request, series_id):
-    context = {'series_id': series_id}
+    context = {
+        'series_id': series_id,
+        'chart_title': 'Course Attendance per Lecture',
+        'chart_description':
+            'Click on Lecture Name shows "Lecture Histogram"; '
+            'Click on Graph Bar shows "Lecture Attendance Report"'
+    }
     episode = Episode.findone(series=series_id)
     if episode:
-        context['episode'] = episode
+        context['episode'] = {
+            'course': episode.course,
+            'series': episode.series,
+        }
     return render(request, 'attendance/series_viewing.html', context)

@@ -1,0 +1,11 @@
+
+        {% load common_tags %}
+        <div class="row">
+            <div class="col-md-12 well">
+                <strong>Course</strong>: {{ episode.course }} ({{ episode.series }})<br/>
+                <strong>Lecture</strong>: {{ episode.title }}<br/>
+                <strong>Mediapackage ID</strong>: {{ episode.mpid }}<br/>
+                <strong>Date</strong>: {{ episode.start }}<br/>
+                <strong>Duration</strong>: {{ episode.duration | video_length }}<br/>
+            </div>
+        </div>

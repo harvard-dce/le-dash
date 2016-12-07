@@ -21,7 +21,13 @@ def index(request):
 
 def lecture(request, mpid):
     episode = Episode.findone(mpid=mpid)
-    context = {'mpid': mpid, 'episode': episode}
+    context = {
+        'mpid': mpid,
+        'episode': episode,
+        'chart_title': 'Lecture Histogram',
+        'chart_description':
+            'Number of Times a Section of the Video Has '
+            'Been Watched (Resolution is 5 Minutes)'}
     return render(request, 'lecture/lecture.html', context)
 
 

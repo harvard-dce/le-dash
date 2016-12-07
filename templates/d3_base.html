@@ -6,6 +6,19 @@
           href="{% static 'css/graph.css' %}">
 {% endblock %}
 
+
+{% block page_title %}
+    {% include "page_title_include.html" %}
+{% endblock %}
+
+{% block content %}
+    {% include "chart_title_include.html" %}
+
+    <div id="summary"></div>
+    <div id="chart"></div>
+{% endblock %}
+
+
 {% block js %}
     <script type="text/javascript" src="{% static 'libs/d3/d3.v3.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/dce_graph.js' %}"></script>

@@ -1,33 +1,24 @@
-{% extends 'd3_base.html' %}
+{% extends "d3_base.html" %}
 
 {% block content %}
+{{ block.super }}
 
-<h1>
-{{ episode.course }}
-</h1>
-<h3>
-{{ series_id }}
-</h3>
-<div id="summary"></div>
-<br/>
-Click on the lecture name to see number of times each section has been viewed
-<br/>
-Click on the bar to see student viewing percentage for each lecture
-<br/>
-<div id="chart"></div>
-<br>
+    <br/>
+    {% include "metadata_course.html" %}
 
 {% endblock %}
+
 
 {% block js %}
 {{ block.super }}
 <script type="text/javascript">
 
+
 $(document).ready(function() {
 
 
 var div = d3.select("body").append("div")
-    .attr("class", "tooltip")               
+    .attr("class", "tooltip")
     .style("opacity", 0);
 
 var formatCount = d3.format(",d"),
@@ -36,7 +27,7 @@ var formatCount = d3.format(",d"),
     formatTime = d3.time.format("%H:%M"), 
     formatSeconds = function(d) { return formatTime(new Date(2016, 0, 1, 0, 0, d)); };
 
-d3.json("{% url 'attendance-series-viewing-data' series_id %}", function(error, data) {
+d3.json("{% url 'attendance-series-viewing-data' episode.series %}", function(error, data) {
     if (error) throw error;
 
     var nested= d3.nest()
