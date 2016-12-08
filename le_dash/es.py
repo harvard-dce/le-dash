@@ -1,7 +1,9 @@
+import hashlib
 from django.conf import settings
 
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search, Q
+from django.core.cache import cache
 
 
 class ESResponse(object):
@@ -25,7 +27,15 @@ class ESQuery(object):
         return self.search.to_dict()
 
     def execute(self):
-        resp = self.search.execute()
+        key = hashlib.md5("{0}".format(self.to_dict()))
+        try:  # Do not crash if cache is missing
+            resp = cache.get(key)
+            if not resp:
+                resp = self.search.execute()
+                if resp.hits > 0:   # only cache good results
+                    cache.set(key, resp)
+        except:
+            resp = self.search.execute()
         return ESResponse(resp)
 
 

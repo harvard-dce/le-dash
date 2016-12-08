@@ -25,7 +25,7 @@
     </div>
     <div class="row">
         <div class="col-md-12 text-center histogram">
-            <graph/>
+            <div id="graph"></div>
         </div>
     </div>
     <div class="row">
@@ -54,26 +54,19 @@
     $(document).ready(function(){
         // Should change to viewports
         var width = 1060,
-                height = 500;
+            height = 500;
 
-        var margin = {top: 40, right: 10, bottom: 50, left: 40},
-                w = width - margin.left - margin.right,
-                h = height - margin.top - margin.bottom;
+        var margin = {top: 40, right: 10, bottom: 50, left: 60},
+            w = width - margin.left - margin.right,
+            h = height - margin.top - margin.bottom;
 
         var formatCount = d3.format(",.0f"),
-                formatTime = d3.time.format("%H:%M"),
-                formatSeconds = function(d) { return formatTime(new Date(2016, 0, 1, 0, 0, d)); };
+            formatTime = d3.time.format("%H:%M");
 
         var y = d3.scale.linear().range([h, 0]),
-                x = d3.scale.ordinal().rangeRoundBands([0, w], .1);
+            x = d3.scale.ordinal().rangeRoundBands([0, w], .1)
 
-        var xAxis = d3.svg.axis().scale(x)
-                        .orient("bottom")
-                        .tickFormat(formatSeconds),
-                yAxis = d3.svg.axis().scale(y).orient("left")
-                        .tickFormat(d3.format("d"));
-
-        var svg = d3.select("graph").append("svg")
+        var svg = d3.select("#graph").append("svg")
                 .attr("width", width )
                 .attr("height", height )
                 .append("g")
@@ -83,7 +76,26 @@
             if (error) throw error;
             data = tallyViewCount(data)
 
+            var xmax = d3.max(data, function(d) { return d.key  });
+            var i=0; // nticks
+            var nticks = ((xmax/10)|0);  // ~ 10 ticks in the axis
+            var formatSeconds = function(d) {
+                    if (xmax > 8000 ) {
+                        if (((d / nticks)|0) == i) { // find closest 
+                            i = i+1;
+                            return formatTime(new Date(2016, 0, 1, 0, 0, d));
+                        }
+                    }
+                    else
+                        return formatTime(new Date(2016, 0, 1, 0, 0, d));
+                };
+            var xAxis = d3.svg.axis().scale(x)
+                    .orient("bottom")
+                    .tickFormat(formatSeconds),
+                yAxis = d3.svg.axis().scale(y).orient("left")
+                    .tickFormat(d3.format("d"));
             // Set the scale domain.
+            //x.domain(formatSeconds(0), formatSeconds(d3.max(data, function(d) { return d.key;})));
             x.domain(data.map(function(d) { return d.key; }));
             y.domain([0, d3.max(data, function(d) { return d.values  })]);
 
@@ -98,6 +110,7 @@
                     .attr("height", function(d) { return h - y(d.values); })
                     .attr("width", x.rangeBand());
 
+            /*
             bar.append("text")
                     .attr("class", "value")
                     .attr("y", function(d) { return y(d.values); })
@@ -106,22 +119,17 @@
                     .attr("dx", ".35em")
                     .attr("text-anchor", "end")
                     .text(function(d) { if (d.values > 0) return formatCount( d.values); });
+                */
 
-            // Override default because the bottom gets too crowd
             svg.append("g")
                     .attr("class", "x axis")
-                    .style({
-                        'font-size': '12px',
-                        'stroke': 'black',
-                        'stroke-width': '1px',
-                        'opacity': 1.0
-                    })
                     .attr("transform", "translate(0,"+ h +")")
                     .call(xAxis);
 
             svg.append("text")
                     .style("text-anchor", "middle")
                     .attr("transform", "translate("+ (width/2) +","+ (h+ margin.bottom) +")")  // centre below axis
+                    .attr("dy", "-1em")
                     .text("Timepoint in the Video");
 
             svg.append("g")
@@ -130,9 +138,9 @@
                     .append("text")
                     .attr("x",-h)
                     .attr("y",-margin.left )
-                    .attr("dy", ".71em")
+                    .attr("dy", "1.5em")
                     .attr("transform", "rotate(-90)")
-                    .style("text-anchor", "left")
+                    .style("text-anchor", "start")
                     .text("Number of times watched by students");
 
         });

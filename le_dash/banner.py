@@ -1,6 +1,9 @@
 import six
+import hashlib
 import requests
 from django.conf import settings
+from django.core.cache import cache
+import logging
 
 if six.PY2:
     from urlparse import urljoin
@@ -8,11 +11,27 @@ else:
     from urllib.parse import urljoin
 
 
+logger = logging.getLogger(__name__)
+
+
 def banner_req(url, params):
+    #  md5 is cheaper than urlunparse/urlencode params 
+    get_url = hashlib.md5("{0}".format(params))
     params['fmt'] = 'json'
+    try:
+        result = cache.get(get_url)
+        if result:
+            return result
+    except:
+        logger.error("Caching is broken")
     resp = requests.get(url, params)
     resp.raise_for_status()
-    return resp.json()
+    result = resp.json()
+    try:
+        cache.set(get_url, result)
+    except:
+        noop()
+    return result
 
 
 def get_student_list(series_id, registered=True):
@@ -25,7 +44,7 @@ def get_student_list(series_id, registered=True):
     students = student_data['students'].get('student', [])
 
     # protect against single-item result which is structured as a dict
-    # rathern than a list of dicts
+    # rather than a list of dicts
     if isinstance(students, dict):
         students = [students]
 

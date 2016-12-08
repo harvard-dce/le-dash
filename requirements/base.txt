@@ -6,3 +6,5 @@ lxml==3.6.4
 requests==2.12.1
 six==1.10.0
 whitenoise==3.2.2
+django-redis-cache==1.7.1
+redis==2.10.5

@@ -150,3 +150,14 @@ ES_INDEX_PATTERNS = {
 }
 
 BANNER_BASE_URL = getenv('BANNER_BASE_URL')
+
+# Use local redis server to cache searches or template fragments,
+# timeout is 1 hour
+# Use KEY_PREFIX for production
+CACHES = {
+    'default': {
+        'BACKEND': 'redis_cache.RedisCache',
+        'LOCATION': 'localhost:6379',
+        'TIMEOUT': 3600,
+    },
+}
