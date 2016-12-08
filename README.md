@@ -8,6 +8,8 @@ Django Project for DCE Learning Engineering Dashboard Apps
 
 1. clone the repo
 1. `pip install -r requirements/dev.txt`
+1. install and start redis
+    eg:  sudo apt-get install redis-server
 1. `cp example.env .env` and update:
     1. set `SECRET_KEY` to anything
     1. set `DJANGO_SETTINGS_MODULE` to `le_dash.settings.dev`
@@ -91,4 +93,17 @@ to create a new configuration. For example, I recommend you create a `tox`
 configuration that exercises only the `flake8` environment. That way you can easily
 click from the `flake8` warning to the precise line of code it's complaining about.
 
+### Cacheing
+
+The caching layer uses redis and  django-redis-cache to cache responses from banner and elasticsearch. 
+
+Defaul redis host:port is the standard `localhost:6379`. To use a different host:port set
+`REDIS_LOCATION` in your `.env`
+
+To disable cacheing set `DISABLE_CACHE=1` in your `.env`
+
+To Test that redis is running, type in the shell and wait for reply:
+
+    $ redis-cli ping
+    PONG
 

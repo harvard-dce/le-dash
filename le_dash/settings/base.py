@@ -150,3 +150,14 @@ ES_INDEX_PATTERNS = {
 }
 
 BANNER_BASE_URL = getenv('BANNER_BASE_URL')
+
+CACHES = {
+    'default': {
+        'BACKEND': 'redis_cache.RedisCache',
+        'LOCATION': getenv('REDIS_LOCATION', 'localhost:6379'),
+        'TIMEOUT': 3600,
+    },
+}
+if getenv('DISABLE_CACHE', False):
+    CACHES['default']['BACKEND'] = \
+        'django.core.cache.backends.dummy.DummyCache'

@@ -55,6 +55,7 @@ d3.json("{% url 'attendance-series-viewing-data' series_id %}", function(error, 
                 title: data.episodes[index].title+
                        " ("+ data.episodes[index].type+")"+
                        " ("+ formatSeconds(data.episodes[index].duration/1000)+")",
+                type: data.episodes[index].type
             }
         }
         // append episode type to aggregation
