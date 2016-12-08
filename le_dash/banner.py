@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 def banner_req(url, params):
-    #  md5 is cheaper than urlunparse/urlencode params 
+    #  md5 is cheaper than urlunparse/urlencode params
     get_url = hashlib.md5("{0}".format(params))
     params['fmt'] = 'json'
     try:
@@ -30,7 +30,7 @@ def banner_req(url, params):
     try:
         cache.set(get_url, result)
     except:
-        noop()
+        pass
     return result
 
 
