@@ -97,6 +97,18 @@ def detailed(request, mpid):
     return render(request, 'attendance/detailed.html', context)
 
 
+def detailedsummary(request, mpid):
+    episode = Episode.findone(mpid=mpid)
+    if episode:
+        context = {'mpid': mpid,
+                   'title': episode.title,
+                   'course_name': episode.course,
+                   'series': episode.series}
+    else:
+        context = {'mpid': mpid}
+    return render(request, 'attendance/detailedsummary.html', context)
+
+
 def summarytable(request, mpid):
     students = rollcall.LectureAttendanceByAllStudents(mpid).all_scores()
     try:

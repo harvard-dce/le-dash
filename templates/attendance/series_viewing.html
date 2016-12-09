@@ -120,7 +120,7 @@ d3.json("{% url 'attendance-series-viewing-data' series_id %}", function(error, 
           .attr("xlink:href", function(d) { return "{% url 'attendance-summary' d.key }"; })
         */
     bar.append("a")
-          .attr("xlink:href", function(d) { return "../../summary/"+ d.key; })
+          .attr("xlink:href", function(d) { return "../../detailed_summary/"+ d.key; })
         .append("rect")
           .attr("width", function(d) { return x(d.values); })
           .attr("height", y.rangeBand());

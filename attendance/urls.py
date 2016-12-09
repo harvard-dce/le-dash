@@ -26,4 +26,6 @@ urlpatterns = [
         name='attendance-series-viewing-data'),
     url(r'^series_viewing/(?P<series_id>\d{11})/$', views.series_viewing,
         name='attendance-series-viewing'),
+    url(r'^detailed_summary/(?P<mpid>[\w\-]{36})/$', views.detailedsummary,
+        name='attendance-detailedsummary'),
 ]

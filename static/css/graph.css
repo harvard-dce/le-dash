@@ -3,6 +3,10 @@
     text-align: center;
 }
 
+.bar {
+  fill: steelblue;
+}
+
 .bar rect {
   fill: steelblue;
 }
@@ -15,25 +19,33 @@
   shape-rendering: crispEdges;
 }
 
-.axis path {
-  stroke: black;
-  fill: none;
+.axis line {
+  stroke: #ccc;
 }
 
-.grid tick  {
-  stroke: lightgrey;
+.grid {
+    stroke: gray;
+    fill: none;
+    stroke-width: 1px;
+    opacity: 0.5;
 }
 
 .grid path  {
-  stroke-width: 0;
+  fill: none;
 }
 
 .x.axis path {
-  stroke: black;
+  stroke: grey;
+  stroke-opacity: .5;
+  opacity: 0.5;
+  display: none;
 }
 
 .y.axis path {
   stroke: black;
+  stroke-opacity: .5;
+  opacity: 0.5;
+  display: none;
 }
 
 
