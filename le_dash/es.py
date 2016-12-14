@@ -256,7 +256,7 @@ class Episode(object):
 
     @staticmethod
     def findall(**kwargs):
-        q = EpisodeQuery(**kwargs)
+        q = EpisodeQuery(size=999, **kwargs)
         resp = q.execute()
         return [Episode(x.to_dict()) for x in resp.hits]
 
@@ -273,14 +273,4 @@ class Episode(object):
         return int(self.duration / 1000)
 
 
-class Series(object):
 
-    def __init__(self, series_id):
-        self.id = series_id
-        self.episodes = Episode.findall(series=series_id)
-
-    def total_lectures(self):
-        return len(self.episodes)
-
-    def course_name(self):
-        return self.episodes[0].course

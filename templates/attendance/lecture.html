@@ -22,15 +22,15 @@
             <table id="report-table" class="display">
                 <thead>
                     <td>Name</td>
+                    <td>Last Name</td>
                     <td>HUID</td>
-                    <td>Status</td>
                     <td>% Viewed</td>
                 </thead>
             {% for row in attendance %}
                 <tr>
                     <td>{{ row.student.name }}</td>
+                    <td>{{ row.student.last_name }}</td>
                     <td>{{ row.student.huid }}</td>
-                    <td>{{ row.student.status }}</td>
                     <td>{{ row.score }}</td>
                 </tr>
             {% endfor %}

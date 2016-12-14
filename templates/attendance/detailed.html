@@ -1,20 +1,47 @@
 {% extends 'd3_base.html' %}
+{% load common_tags %}
+
+{% block page_title %}
+    Lecture Viewing Detail : {{ episode.course }} : {{ episode.title }}
+{% endblock %}
 
 {% block content %}
-<h1> {{ title }} - Detailed Student Viewing </h1>
-<h3> {{ course_name }} {{ series }} </h3>
-Minutes of the video viewed at least once. (Resolution is 1 minute )
-<br>
-<UL>
-<LI><a href="{% url 'attendance-summary' mpid %}">Student viewing summary</a>
-{% if series %}
-<LI><a href="{% url 'attendance-series' series %}">Student series attendance table</a>
-<LI><a href="{% url 'attendance-series-viewing' series %}">Series viewing by students</a>
-{% else %}
-<LI>No series information found
-{% endif %}
-</ul>
-<div id="chart"></div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <h3>{{ episode.course }} : {{ episode.title }}</h3>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <h5>
+                <a href="{% url 'attendance-series' episode.series %}">Course Student Report</a>
+                |
+                <a href="{% url 'attendance-lectures' episode.series %}">Course Lecture Report</a>
+                |
+                <a href="{% url 'lecture' episode.mpid %}">Histogram View</a>
+                |
+                Detailed View</a>
+            </h5>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 text-center histogram">
+            <div id="chart"></div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <strong>Course ID</strong>:
+            {{ episode.series }}<br/>
+            <strong>Mediapackage ID</strong>:
+            {{ episode.mpid }}<br/>
+            <strong>Date</strong>:
+            {{ episode.start | episode_date }}<br/>
+            <strong>Duration</strong>:
+            {{ episode.duration | video_length }}<br/>
+        </div>
+    </div>
 
 {% endblock %}
 
@@ -33,7 +60,7 @@ function format_student_name(student){
     );
 }
 
-d3.json("{% url 'attendance-data' mpid %}", function(error, data) {
+d3.json("{% url 'attendance-data' episode.mpid %}", function(error, data) {
     if (error) throw error;
     //console.log(data);
     var students = {};
@@ -203,9 +230,9 @@ d3.json("{% url 'attendance-data' mpid %}", function(error, data) {
         .attr("transform", "translate(" + -margin.left + "," + 10  + ")")
         .attr("font-family", "sans-serif")
         //.style({ 'stroke-width': 0, 'fill': 'grey', 'opacity': 0.8 })
-        .text(function(d) { return formatPercent(d.total/duration); });
+        //.text(function(d) { return formatPercent(d.total/duration); });
 
-    scatterChartContainer.append("text")
+/*    scatterChartContainer.append("text")
           .attr("class", "scatterPlot x axis")
           .attr("transform", "rotate(-90)")
           .style("text-anchor", "middle")
@@ -213,8 +240,9 @@ d3.json("{% url 'attendance-data' mpid %}", function(error, data) {
           .attr("y",-margin.left *2 )
           .attr("dy", ".71em")
           .text("Viewers (Registered Students are listed by name)");
+          */
 
-    scatterChartContainer.append("g")
+/*    scatterChartContainer.append("g")
           .attr("class", "scatterPlot y axis")
           .style("text-anchor", "end")
           .append("text")
@@ -222,6 +250,7 @@ d3.json("{% url 'attendance-data' mpid %}", function(error, data) {
           .attr("y", -margin.top )
           .attr("dy", "-.71em")
           .text("Time points in video ("+ formatSeconds(duration)+ ")" );
+          */
 
 });
 });

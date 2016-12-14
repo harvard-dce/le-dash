@@ -3,18 +3,27 @@
 
 {% block extra_css %}
     <link rel="stylesheet" type="text/css"
-          href="{% static 'libs/datatables/jquery.dataTables.min.css' %}">
+          href="{% static 'libs/datatables/css/jquery.dataTables.min.css' %}">
 {% endblock %}
 
 {% block js %}
-    <script type="text/javascript" src="{% static 'libs/datatables/jquery.dataTables.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'libs/datatables/js/jquery.dataTables.min.js' %}"></script>
+    <!--
     <script type="text/javascript">
     $(document).ready(function(){
         $('#report-table').DataTable({
-            "ordering": false,
+            "order": [],
             "iDisplayLength": 25,
             "offsetTop": 60,
+            "columns": [
+                {"orderData": [1], 'targets': [0]},
+                {"targets": [1], "visible": false, "searchable": false},
+                    null,
+                {"orderData": [4], 'targets': [3]},
+                {"targets": [3], "visible": false, "searchable": false, "type": "num"}
+            ]
         });
     });
     </script>
+    -->
 {% endblock %}

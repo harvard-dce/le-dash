@@ -1,19 +1,23 @@
 {% extends 'attendance/base.html' %}
 
 {% block page_title %}
-    Attendance Report for {{ series.course_name }}
+    Course Student Report : {{ series.course_name }}
 {% endblock %}
 
 {% block content %}
 
     <div class="row">
         <div class="col-md-12">
-            <h3>Attendance Report</h3>
+            <h3>{{ series.course_name }}</h3>
         </div>
     </div>
     <div class="row">
         <div class="col-md-12">
-            <h5>{{ series.course_name }}</h5>
+            <h5>
+                Course Student Report
+                |
+                <a href="{% url 'attendance-lectures' series.id %}">Course Lecture Report</a>
+            </h5>
         </div>
     </div>
     <div class="row">
@@ -21,21 +25,54 @@
             <table id="report-table" class="display">
                 <thead>
                     <td>Name</td>
+                    <td>Last Name (hidden/sorting)</td>
                     <td>HUID</td>
-                    <td>Status</td>
-                    <td>Lectures Viewed</td>
+                    <td>Lectures Viewed of {{ series.total_lectures }}</td>
+                    <td>Viewed (hidden/sorting)</td>
                 </thead>
             {% for row in attendance %}
                 <tr>
                     <td>{{ row.student.name }}</td>
+                    <td>{{ row.student.last_name }}</td>
                     <td>{{ row.student.huid }}</td>
-                    <td>{{ row.student.status }}</td>
-                    <td>{{ row.lectures_watched }} of {{ series.total_lectures }}</td>
+                    <td>
+                        {% if row.lectures_watched %}
+                            <div class="attendance-bar text-right"
+                                 style="width: calc(90% * ({{ row.lectures_watched }} / {{ series.total_lectures}}));">
+                                {{ row.lectures_watched }}
+                            </div>
+                            <div style="display:inline-block">of {{ series.total_lectures }}</div>
+                        {% else %}
+                            0 of {{ series.total_lectures }}
+                        {% endif %}
+                    </td>
+                    <td>{{ row.lectures_watched }}</td>
                 </tr>
             {% endfor %}
             </table>
         </div>
     </div>
 
+{% endblock %}
+
+{% block js %}
+{{ block.super }}
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('#report-table').DataTable({
+                "order": [],
+                "iDisplayLength": 25,
+                "offsetTop": 60,
+                "columns": [
+                    {"orderData": [1], 'targets': [0]},
+                    {"targets": [1], "visible": false, "searchable": false},
+                    null,
+                    {"orderData": [4], 'targets': [3]},
+                    {"targets": [3], "visible": false, "searchable": false, "type": "num"}
+                ]
+            });
+        });
+    </script>
 {% endblock %}
 

@@ -1,0 +1,85 @@
+{% extends 'attendance/base.html' %}
+{% load common_tags %}
+
+{% block page_title %}
+    Course Lecture Report : {{ series.course_name }}
+{% endblock %}
+
+{% block content %}
+
+    <div class="row">
+        <div class="col-md-12">
+            <h3>{{ series.course_name }}</h3>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <h5>
+                <a href="{% url 'attendance-series' series.id %}">Course Student Report</a>
+                |
+                Course Lecture Report
+            </h5>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <div id="chart"></div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <table id="report-table" class="display">
+                <thead>
+                <td>Lecture Title</td>
+                <td>Date</td>
+                <td>Duration</td>
+                <td>Students Watched</td>
+                <td>Students Watched (hidden/sorting)</td>
+                </thead>
+                {% for row in lectures %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'lecture' row.episode.mpid %}">{{ row.episode.title }}</a>
+                        </td>
+                        <td>{{ row.episode.start | episode_date }}</td>
+                        <td>{{ row.episode.duration | video_length }}</td>
+                        <td>
+                            {% if row.students_watched %}
+                                <div class="attendance-bar text-right"
+                                     style="width: calc(90% * ({{ row.students_watched }} / {{ total_students}}));">
+                                    {{ row.students_watched }}
+                                </div>
+                                <div style="display:inline-block">of {{ total_students }}</div>
+                            {% else %}
+                                0 of {{ total_students }}
+                            {% endif %}
+                        </td>
+                        <td>{{ row.students_watched }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block js %}
+{{ block.super }}
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('#report-table').DataTable({
+                "order": [],
+                "iDisplayLength": 25,
+                "offsetTop": 60,
+                "columns": [
+                    null,
+                    {"type": "date"},
+                    null,
+                    {"orderData": [4], 'targets': [3]},
+                    {"targets": [3], "visible": false, "searchable": false, "type": "num"}
+                ]
+            });
+        });
+    </script>
+{% endblock %}

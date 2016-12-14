@@ -3,24 +3,27 @@
 {% load common_tags %}
 
 {% block page_title %}
-    Viewing Histogram for {{ episode.course }}: {{ episode.title }}
+    Viewing Histogram : {{ episode.course }} : {{ episode.title }}
 {% endblock %}
 
 {% block content %}
 
     <div class="row">
         <div class="col-md-12">
-            <h3>Viewing Histogram</h3>
+            <h3>{{ episode.course }} : {{ episode.title }}</h3>
         </div>
     </div>
     <div class="row">
         <div class="col-md-12">
-            <h5>{{ episode.course }}: {{ episode.title }}</h5>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-12">
-            Number of times a section of the video has been watched (resolution is 5 minutes)
+            <h5>
+                <a href="{% url 'attendance-series' episode.series %}">Course Student Report</a>
+                |
+                <a href="{% url 'attendance-lectures' episode.series %}">Course Lecture Report</a>
+                |
+                Histogram View
+                |
+                <a href="{% url 'attendance-detailed' episode.mpid %}">Detailed View</a>
+            </h5>
         </div>
     </div>
     <div class="row">
@@ -30,16 +33,12 @@
     </div>
     <div class="row">
         <div class="col-md-12">
-            <strong>Attendance Report</strong>:
-            <a href="{% url 'attendance-lecture' episode.mpid %}">Lecture</a>
-            |
-            <a href="{% url 'attendance-series' episode.series %}">Course</a><br/>
-            <strong>Series</strong>:
+            <strong>Course ID</strong>:
             {{ episode.series }}<br/>
             <strong>Mediapackage ID</strong>:
             {{ episode.mpid }}<br/>
             <strong>Date</strong>:
-            {{ episode.start }}<br/>
+            {{ episode.start | episode_date }}<br/>
             <strong>Duration</strong>:
             {{ episode.duration | video_length }}<br/>
         </div>

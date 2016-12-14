@@ -94,3 +94,15 @@ div.histogram {
   margin-top: 60px;
   margin-bottom: 60px;
 }
+
+div.attendance-bar {
+  color: white;
+  background-color: steelblue;
+  padding: 2px 5px;
+  vertical-align: middle;
+  display: inline-block;
+}
+
+div.attendance-bar-zero {
+  color: steelblue;
+}

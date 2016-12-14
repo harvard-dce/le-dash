@@ -1,5 +1,6 @@
 from __future__ import division
 
+import random
 from math import ceil
 from six import string_types
 from le_dash.banner import get_student_list
@@ -9,15 +10,16 @@ ATTENDANCE_INTERVAL_INPOINT = 180
 ATTENDANCE_WATCHED_THRESHOLD = 50
 
 
-def series_attendance(series_id):
-    students = [Student(x) for x in get_student_list(series_id)]
-    attendance = SeriesAttendance.from_series_id(series_id)
+def series_attendance(series):
+    students = [Student(x) for x in get_student_list(series.id)]
+    attendance = SeriesAttendance.from_series(series)
     student_attendance = []
     for student in students:
         lectures_watched = attendance.lectures_watched(student.huid)
         student_attendance.append({
             'student': student,
-            'lectures_watched': lectures_watched
+            'lectures_watched': lectures_watched,
+            'lectures_watched_percent': random.randint(0,100)
         })
     return sorted(
         student_attendance,
@@ -25,7 +27,21 @@ def series_attendance(series_id):
     )
 
 
-def lecture_attendance(mpid, sort_key='student.last_name'):
+def series_lectures(series):
+    attendance = SeriesAttendance.from_series(series)
+    lecture_list = []
+    for mpid, ep in attendance.episodes.items():
+        lecture_list.append({
+            'episode': ep,
+            'students_watched': attendance.students_watched(ep.mpid)
+        })
+    return sorted(
+        lecture_list,
+        key=lambda x: getattr(x['episode'], 'title')
+    )
+
+
+def lecture_attendance(mpid):
     episode = Episode.findone(mpid=mpid)
     students = [Student(x) for x in get_student_list(episode.series)]
     attendance = LectureAttendance.from_episode(episode)
@@ -69,19 +85,33 @@ class Student(object):
         return ''
 
 
+class Series(object):
+
+    def __init__(self, series_id):
+        self.id = series_id
+        self.episodes = Episode.findall(series=series_id)
+        self.students = [Student(x) for x in get_student_list(series_id)]
+
+    def total_lectures(self):
+        return len(self.episodes)
+
+    def course_name(self):
+        return self.episodes[0].course
+
+
 class SeriesAttendance(object):
 
     @classmethod
-    def from_series_id(cls, series_id):
-        q = StudentSeriesWatchQuery(series_id, ATTENDANCE_INTERVAL_INPOINT)
+    def from_series(cls, series):
+        q = StudentSeriesWatchQuery(series.id, ATTENDANCE_INTERVAL_INPOINT)
         resp = q.execute()
-        return cls(series_id, resp)
+        return cls(series, resp)
 
-    def __init__(self, series_id, es_resp=None):
-        self.series_id = series_id
+    def __init__(self, series, es_resp=None):
+        self.series = series
         self.es_resp = es_resp
         self.episodes = dict(
-            (x.mpid, x) for x in Episode.findall(series=series_id)
+            (x.mpid, x) for x in Episode.findall(series=series.id)
         )
 
     def lectures_watched(self, huid):
@@ -95,6 +125,23 @@ class SeriesAttendance(object):
                 continue
             total_intervals = ceil(
                 ep.seconds / ATTENDANCE_INTERVAL_INPOINT
+            )
+            watch_score = int(100.0 * (len(inpoint_buckets) / total_intervals))
+            if watch_score >= ATTENDANCE_WATCHED_THRESHOLD:
+                watched += 1
+        return watched
+
+    def students_watched(self, mpid):
+        watched = 0
+        for student in self.series.students:
+            inpoint_buckets = self.es_resp.get_agg_buckets(
+                'by_inpoint',
+                [('by_huid', student.huid), ('by_mpid', mpid)]
+            )
+            if inpoint_buckets is None:
+                continue
+            total_intervals = ceil(
+                self.episodes[mpid].seconds / ATTENDANCE_INTERVAL_INPOINT
             )
             watch_score = int(100.0 * (len(inpoint_buckets) / total_intervals))
             if watch_score >= ATTENDANCE_WATCHED_THRESHOLD:
