@@ -1,8 +1,57 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 
-{% block content %}
-<div class=jumbotron">
-  <h1>u-hu you're home!</h1>
-</div><!-- /.jumbotron -->
+{% load common_tags %}
+{% block page_title %}
 {% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" type="text/css"
+          href="{% static 'libs/datatables/jquery.dataTables.min.css' %}">
+{% endblock %}
+
+{% block js %}
+    <script type="text/javascript" src="{% static 'libs/datatables/jquery.dataTables.min.js' %}"></script>
+    <script type="text/javascript">
+    $(document).ready(function(){
+        $('#report-table').DataTable({
+            "ordering": false,
+            "iDisplayLength": 10,
+            "offsetTop": 60,
+        });
+    });
+    </script>
+{% endblock %}
+
+{% block content %}
+
+    <div class="row">
+        <div class="col-md-12">
+          <h3> Courses for this term {{ term }} </h3>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <table id="report-table" class="display">
+                <thead>
+                    <td>Name</td>
+                    <td>Title</td>
+                </thead>
+            {% for course in courses %}
+                <tr>
+                    <td>
+                    <a href="{% url 'attendance-series-viewing' course.fullcrn %}"> {{ course.course_name }} </a>
+                    </td>
+                    <td>{%if course.course_long_title %}
+                        {{ course.course_long_title }}
+                        {%else %}
+                        {{ course.course_title }}
+                        {%endif%}
+                        </td>
+                </tr>
+            {% endfor %}
+            </table>
+        </div>
+    </div>
+
+{% endblock %}
+
